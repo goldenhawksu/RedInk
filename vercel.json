@@ -1,35 +1,11 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backendjs/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["backendjs/dist/**", "backendjs/src/prompts/**"]
-      }
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backendjs/src/index.ts"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
