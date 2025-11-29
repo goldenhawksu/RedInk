@@ -216,17 +216,29 @@
           <div class="modal-gallery-grid">
              <div v-for="(img, idx) in viewingRecord.images.generated" :key="idx" class="modal-img-item">
                 <!-- 图片预览区域 -->
-                <div class="modal-img-preview" v-if="img">
+                <div class="modal-img-preview" v-if="img" @click="openImageViewer(idx)" style="cursor: pointer;">
                   <img
                     :src="normalizeImageUrl(`/api/images/${viewingRecord.images.task_id}/${img}`)"
                     loading="lazy"
                     decoding="async"
                   />
-                  <!-- 重新生成按钮（悬停显示） -->
+                  <!-- 操作按钮层（悬停显示） -->
                   <div class="modal-img-overlay">
                     <button
                       class="modal-overlay-btn"
-                      @click="regenerateHistoryImage(idx)"
+                      @click.stop="openImageViewer(idx)"
+                      title="查看大图"
+                      style="margin-bottom: 8px;"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      查看大图
+                    </button>
+                    <button
+                      class="modal-overlay-btn"
+                      @click.stop="regenerateHistoryImage(idx)"
                       :disabled="regeneratingImages.has(idx)"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -267,11 +279,19 @@
       </div>
     </div>
 
+    <!-- 图片查看器 -->
+    <ImageViewer
+      :show="showImageViewer"
+      :images="viewerImages"
+      :initialIndex="viewerImageIndex"
+      @close="showImageViewer = false"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   getHistoryList,
@@ -286,6 +306,7 @@ import {
   normalizeImageUrl  // 导入URL转换函数
 } from '../api'
 import { useGeneratorStore } from '../stores/generator'
+import ImageViewer from '../components/ImageViewer.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -312,6 +333,17 @@ const rawInputExpanded = ref(false)
 const showOutlineModal = ref(false)
 // 扫描状态
 const isScanning = ref(false)
+// 图片查看器状态
+const showImageViewer = ref(false)
+const viewerImageIndex = ref(0)
+
+// 获取当前预览的所有图片URL
+const viewerImages = computed(() => {
+  if (!viewingRecord.value?.images?.generated) return []
+  return viewingRecord.value.images.generated
+    .filter((img: string) => img) // 过滤空值
+    .map((img: string) => normalizeImageUrl(`/api/images/${viewingRecord.value.images.task_id}/${img}`))
+})
 
 const loadData = async () => {
   loading.value = true
@@ -415,6 +447,13 @@ const closeGallery = () => {
   titleExpanded.value = false // 关闭时重置标题展开状态
   rawInputExpanded.value = false // 关闭时重置原始输入展开状态
   showOutlineModal.value = false // 关闭大纲模态框
+  showImageViewer.value = false // 关闭图片查看器
+}
+
+// 打开图片查看器
+const openImageViewer = (index: number) => {
+  viewerImageIndex.value = index
+  showImageViewer.value = true
 }
 
 // 复制原始输入
@@ -1050,8 +1089,10 @@ onMounted(async () => {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
+  flex-direction: column; /* 垂直排列按钮 */
   align-items: center;
   justify-content: center;
+  gap: 8px; /* 按钮之间的间距 */
   opacity: 0;
   transition: opacity 0.15s ease-out;
   pointer-events: none;

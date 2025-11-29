@@ -65,6 +65,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 图片查看器 -->
+    <ImageViewer
+      :show="showImageViewer"
+      :images="viewerImages"
+      :initialIndex="viewerImageIndex"
+      @close="showImageViewer = false"
+    />
   </div>
 </template>
 
@@ -85,18 +93,42 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGeneratorStore } from '../stores/generator'
 import { regenerateImage, normalizeImageUrl } from '../api'
+import ImageViewer from '../components/ImageViewer.vue'
 
 const router = useRouter()
 const store = useGeneratorStore()
 const regeneratingIndex = ref<number | null>(null)
 
+// 图片查看器状态
+const showImageViewer = ref(false)
+const viewerImageIndex = ref(0)
+
+// 获取所有图片URL
+const viewerImages = computed(() => {
+  return store.images
+    .filter(img => img.url) // 过滤空URL
+    .map(img => {
+      const baseUrl = img.url.split('?')[0]
+      return baseUrl + '?thumbnail=false'
+    })
+})
+
+// 打开图片查看器
+const openImageViewer = (index: number) => {
+  viewerImageIndex.value = index
+  showImageViewer.value = true
+}
+
 const viewImage = (url: string) => {
-  const baseUrl = url.split('?')[0]
-  window.open(baseUrl + '?thumbnail=false', '_blank')
+  // 找到图片在数组中的索引
+  const index = store.images.findIndex(img => img.url === url)
+  if (index !== -1) {
+    openImageViewer(index)
+  }
 }
 
 const startOver = () => {
