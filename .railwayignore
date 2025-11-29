@@ -1,30 +1,26 @@
-# 忽略 Python 后端
-backend/
-*.py
-*.pyc
-__pycache__/
-pyproject.toml
-uv.lock
-.venv/
-venv/
-
-# 忽略前端（已在构建中处理）
-frontend/
+# 忽略 Node.js 后端
+backendjs/
+package.json
+package-lock.json
+node_modules/
 
 # 忽略 Deno 后端
 deno-backend/
+
+# 忽略前端源码(Dockerfile会处理前端构建)
+frontend/node_modules/
+frontend/.vite/
+frontend/.env.development
 
 # 忽略文档和测试
 docs/
 test/
 *.md
-!package.json
 
 # 忽略其他非必需文件
 .spec-workflow/
 history/
-docker/
-Dockerfile.python-backend
-docker-compose.yml
 .git/
 .gitignore
+.vscode/
+.idea/
