@@ -88,7 +88,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGeneratorStore } from '../stores/generator'
-import { regenerateImage } from '../api'
+import { regenerateImage, normalizeImageUrl } from '../api'
 
 const router = useRouter()
 const store = useGeneratorStore()
@@ -117,7 +117,7 @@ const downloadOne = (image: any) => {
 const downloadAll = () => {
   if (store.recordId) {
     const link = document.createElement('a')
-    link.href = `/api/history/${store.recordId}/download`
+    link.href = normalizeImageUrl(`/api/history/${store.recordId}/download`)
     link.click()
   } else {
     store.images.forEach((image, index) => {
