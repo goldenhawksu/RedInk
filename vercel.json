@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "redink",
   "builds": [
     {
       "src": "frontend/package.json",
@@ -10,32 +9,27 @@
       }
     },
     {
-      "src": "backendjs/package.json",
+      "src": "backendjs/src/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["dist/**", "prompts/**"]
+        "includeFiles": ["backendjs/dist/**", "backendjs/src/prompts/**"]
       }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backendjs/dist/index.js"
+      "dest": "backendjs/src/index.ts"
     },
     {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/dist/$1"
+      "dest": "/index.html"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
   }
 }
