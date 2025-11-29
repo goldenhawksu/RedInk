@@ -89,7 +89,7 @@ docker run -d -p 12398:12398 -v ./output:/app/output histonemax/redink:latest
 
 **使用 docker-compose（可选）：**
 
-下载 [docker-compose.yml](https://github.com/HisMax/RedInk/blob/main/docker-compose.yml) 后：
+下载 [docker-compose.yml](https://github.com/goldenhawksu/RedInk/blob/main/docker-compose.yml) 后：
 
 ```bash
 docker-compose up -d
@@ -112,7 +112,7 @@ docker-compose up -d
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/HisMax/RedInk.git
+git clone https://github.com/goldenhawksu/RedInk.git
 cd RedInk
 ```
 
@@ -293,7 +293,7 @@ providers:
 
 ## 交流讨论与赞助
 
-- **GitHub Issues**: [https://github.com/HisMax/RedInk/issues](https://github.com/HisMax/RedInk/issues)
+- **GitHub Issues**: [https://github.com/goldenhawksu/RedInk/issues](https://github.com/goldenhawksu/RedInk/issues)
 
 ### 联系作者
 

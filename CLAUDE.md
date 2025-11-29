@@ -339,5 +339,5 @@ docker run -d \
 
 ## 项目链接
 
-- GitHub: https://github.com/HisMax/RedInk
+- GitHub: https://github.com/goldenhawksu/RedInk
 - Docker Hub: https://hub.docker.com/r/histonemax/redink

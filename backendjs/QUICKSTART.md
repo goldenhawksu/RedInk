@@ -59,7 +59,7 @@ npm run dev
 ### 1. 克隆项目 (30 秒)
 
 ```bash
-git clone https://github.com/HisMax/RedInk.git
+git clone https://github.com/goldenhawksu/RedInk.git
 cd RedInk/backendjs
 ```
 
@@ -313,7 +313,7 @@ LOG_LEVEL=debug npm run dev
 
 1. **查看日志**: 终端输出会显示详细的错误信息
 2. **查看文档**: [DEPLOYMENT.md](DEPLOYMENT.md) 包含完整的故障排查指南
-3. **提交 Issue**: [GitHub Issues](https://github.com/HisMax/RedInk/issues)
+3. **提交 Issue**: [GitHub Issues](https://github.com/goldenhawksu/RedInk/issues)
 
 ---
 

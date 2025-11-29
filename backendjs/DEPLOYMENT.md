@@ -56,7 +56,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/HisMax/RedInk.git
+git clone https://github.com/goldenhawksu/RedInk.git
 cd RedInk/backendjs
 
 # 或者如果已有项目，直接进入目录
@@ -1148,7 +1148,7 @@ vercel --prod
 
 - **项目文档**: [README.md](README.md)
 - **API 文档**: 访问 `/api/health` 查看服务状态
-- **问题反馈**: [GitHub Issues](https://github.com/HisMax/RedInk/issues)
+- **问题反馈**: [GitHub Issues](https://github.com/goldenhawksu/RedInk/issues)
 - **测试报告**: [backendjs-final-test-report.md](../docs/backendjs-final-test-report.md)
 
 ---

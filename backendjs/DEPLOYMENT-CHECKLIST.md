@@ -454,7 +454,7 @@
 ### 获取帮助
 
 - 📖 查看 [DEPLOYMENT.md](DEPLOYMENT.md) 了解详细配置
-- 🐛 提交问题到 [GitHub Issues](https://github.com/HisMax/RedInk/issues)
+- 🐛 提交问题到 [GitHub Issues](https://github.com/goldenhawksu/RedInk/issues)
 - 📊 查看 [测试报告](../docs/backendjs-final-test-report.md) 了解性能指标
 
 ---

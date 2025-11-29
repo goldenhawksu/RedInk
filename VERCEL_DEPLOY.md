@@ -2,7 +2,7 @@
 
 一键将红墨小红书AI图文生成器（前端+后端）部署到 Vercel。
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HisMax/RedInk&env=TEXT_API_KEY,IMAGE_API_KEY&envDescription=API密钥配置&envLink=https://github.com/HisMax/RedInk/blob/main/README.md&project-name=redink&repository-name=redink)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/goldenhawksu/RedInk&env=TEXT_API_KEY,IMAGE_API_KEY&envDescription=API密钥配置&envLink=https://github.com/goldenhawksu/RedInk/blob/main/README.md&project-name=redink&repository-name=redink)
 
 ---
 
@@ -62,7 +62,7 @@
 
 #### 步骤 1: Fork 仓库
 
-1. 访问 https://github.com/HisMax/RedInk
+1. 访问 https://github.com/goldenhawksu/RedInk
 2. 点击右上角 "Fork" 按钮
 
 #### 步骤 2: 导入到 Vercel

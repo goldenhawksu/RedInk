@@ -192,7 +192,7 @@
     <!-- 首页页脚版权 -->
     <footer class="home-footer">
       <div class="footer-copyright">
-        © 2025 <a href="https://github.com/HisMax/RedInk" target="_blank" rel="noopener noreferrer">RedInk</a> by 默子 (Histone)
+        © 2025 <a href="https://github.com/goldenhawksu/RedInk" target="_blank" rel="noopener noreferrer">RedInk</a> by 默子 (Histone)
       </div>
       <div class="footer-license-info">
         Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
