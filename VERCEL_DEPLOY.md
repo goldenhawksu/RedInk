@@ -1,12 +1,69 @@
-# 🚀 一键部署到 Vercel
+# 🚀 一键部署红墨 - 完整方案
 
-一键将红墨小红书AI图文生成器（前端+后端）部署到 Vercel。
+## 📦 部署架构
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/goldenhawksu/RedInk&env=TEXT_API_KEY,IMAGE_API_KEY&envDescription=API密钥配置&envLink=https://github.com/goldenhawksu/RedInk/blob/main/README.md&project-name=redink&repository-name=redink)
+**推荐部署方案**: 前后端分离部署
+
+- **前端** → Vercel (静态站点,免费)
+- **后端** → Railway (Node.js 应用,免费额度充足)
+
+> ⚠️ **重要**: 由于 Vercel 对 Monorepo 的支持有限,我们采用前后端分离部署的方式。
 
 ---
 
-## 📋 部署前准备
+## 🎯 前端部署到 Vercel
+
+### 一键部署按钮
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/goldenhawksu/RedInk&project-name=redink-frontend&repository-name=redink)
+
+---
+
+## 📋 前端部署步骤
+
+### 步骤 1: 点击部署按钮
+点击上方 "Deploy with Vercel" 按钮
+
+### 步骤 2: 配置项目
+1. 授权 GitHub 账号
+2. 项目会自动导入
+
+### 步骤 3: Vercel 会自动构建前端
+- 无需额外配置
+- 等待 2-3 分钟
+
+### 步骤 4: 获取部署 URL
+部署成功后,您会获得前端 URL,例如:
+```
+https://redink-frontend-xxx.vercel.app
+```
+
+**重要**: 先记下这个 URL,稍后需要配置后端。
+
+---
+
+## 🚂 后端部署到 Railway
+
+### 一键部署到 Railway
+
+1. **访问 Railway**
+   - 打开 https://railway.app
+   - 使用 GitHub 账号登录
+
+2. **创建新项目**
+   - 点击 "New Project"
+   - 选择 "Deploy from GitHub repo"
+   - 选择 `RedInk` 仓库
+
+3. **Railway 会自动检测配置**
+   - 检测到 `railway.json` 配置
+   - 自动安装依赖和构建
+
+4. **配置环境变量**
+
+   在 Railway 项目中添加以下变量:
+
+   **必需**:
 
 ### 1. 获取 API Key
 
