@@ -116,6 +116,27 @@ class ImageService:
 
         return filepath
 
+    def _get_image_url(self, task_id: str, filename: str) -> str:
+        """
+        生成图片的完整URL
+
+        Args:
+            task_id: 任务ID
+            filename: 文件名
+
+        Returns:
+            完整的图片URL
+        """
+        # 获取公网域名
+        public_domain = Config.PUBLIC_DOMAIN
+
+        if public_domain:
+            # Railway环境:使用完整URL
+            return f"https://{public_domain}/api/images/{task_id}/{filename}"
+        else:
+            # 本地开发:使用相对路径
+            return f"/api/images/{task_id}/{filename}"
+
     def _generate_single_image(
         self,
         page: Dict,
@@ -334,7 +355,7 @@ class ImageService:
                     "data": {
                         "index": index,
                         "status": "done",
-                        "image_url": f"/api/images/{task_id}/{filename}",
+                        "image_url": self._get_image_url(task_id, filename),
                         "phase": "cover"
                     }
                 }
@@ -416,7 +437,7 @@ class ImageService:
                                     "data": {
                                         "index": index,
                                         "status": "done",
-                                        "image_url": f"/api/images/{task_id}/{filename}",
+                                        "image_url": self._get_image_url(task_id, filename),
                                         "phase": "content"
                                     }
                                 }
@@ -496,7 +517,7 @@ class ImageService:
                             "data": {
                                 "index": index,
                                 "status": "done",
-                                "image_url": f"/api/images/{task_id}/{filename}",
+                                "image_url": self._get_image_url(task_id, filename),
                                 "phase": "content"
                             }
                         }
@@ -597,7 +618,7 @@ class ImageService:
             return {
                 "success": True,
                 "index": index,
-                "image_url": f"/api/images/{task_id}/{filename}"
+                "image_url": self._get_image_url(task_id, filename)
             }
         else:
             return {
@@ -675,7 +696,7 @@ class ImageService:
                             "data": {
                                 "index": index,
                                 "status": "done",
-                                "image_url": f"/api/images/{task_id}/{filename}"
+                                "image_url": self._get_image_url(task_id, filename)
                             }
                         }
                     else:

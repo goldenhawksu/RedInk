@@ -1,5 +1,6 @@
 import logging
 import yaml
+import os
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,10 @@ class Config:
         'https://redink-self.vercel.app',  # Vercel 前端域名
     ]
     OUTPUT_DIR = 'output'
+
+    # Railway 公网域名(用于生成图片完整URL)
+    # Railway会自动设置 RAILWAY_PUBLIC_DOMAIN 环境变量
+    PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN', os.getenv('PUBLIC_DOMAIN', ''))
 
     _image_providers_config = None
     _text_providers_config = None
