@@ -11,9 +11,30 @@ import { base64ToBuffer } from './utils/imageUtils';
 // 创建 Express 应用
 const app = express();
 
+// CORS 配置
+const allowedOrigins = config.CORS_ORIGINS.length > 0 && config.CORS_ORIGINS[0] !== 'http://localhost:5173'
+  ? config.CORS_ORIGINS
+  : [
+      'https://redink-self.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+
 // 中间件
 app.use(cors({
-  origin: config.CORS_ORIGINS,
+  origin: (origin, callback) => {
+    // 允许无 origin 的请求（例如 Postman、服务器端请求）
+    if (!origin) return callback(null, true);
+
+    // 检查是否在允许列表中
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace('*', '')))) {
+      callback(null, true);
+    } else {
+      logger.warn(`❌ CORS 拒绝来源: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
