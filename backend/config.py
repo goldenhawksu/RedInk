@@ -10,11 +10,23 @@ class Config:
     DEBUG = True
     HOST = '0.0.0.0'
     PORT = 12398
-    CORS_ORIGINS = [
+
+    # CORS 允许的源
+    # 基础列表(开发环境)
+    _BASE_CORS_ORIGINS = [
         'http://localhost:5173',
         'http://localhost:3000',
         'https://redink-self.vercel.app',  # Vercel 前端域名
     ]
+
+    # 从环境变量读取额外的CORS源(逗号分隔)
+    # 例如: CORS_ORIGINS=https://xhs.spdt.work,https://another-domain.com
+    _env_cors = os.getenv('CORS_ORIGINS', '')
+    _extra_origins = [origin.strip() for origin in _env_cors.split(',') if origin.strip()]
+
+    # 合并基础列表和环境变量配置
+    CORS_ORIGINS = list(set(_BASE_CORS_ORIGINS + _extra_origins))
+
     OUTPUT_DIR = 'output'
 
     # Railway 公网域名(用于生成图片完整URL)

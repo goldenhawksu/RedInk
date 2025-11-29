@@ -55,6 +55,8 @@ def create_app():
 
     app.config.from_object(Config)
 
+    # 配置 CORS
+    logger.info(f"🌐 CORS 允许的域名: {Config.CORS_ORIGINS}")
     CORS(app, resources={
         r"/api/*": {
             "origins": Config.CORS_ORIGINS,
