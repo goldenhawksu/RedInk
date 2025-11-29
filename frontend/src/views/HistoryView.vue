@@ -509,6 +509,12 @@ function downloadImage(filename: string, index: number) {
 async function downloadAllImages() {
   if (!viewingRecord.value) return
 
+  // 检查是否有图片
+  if (!viewingRecord.value.images?.task_id || viewingRecord.value.images.generated.length === 0) {
+    alert('该作品尚未生成图片,无法下载')
+    return
+  }
+
   // 调用 ZIP 下载接口
   const link = document.createElement('a')
   link.href = normalizeImageUrl(`/api/history/${viewingRecord.value.id}/download`)

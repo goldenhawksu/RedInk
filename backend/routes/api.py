@@ -657,9 +657,10 @@ def download_history_zip(record_id):
         task_id = record.get('images', {}).get('task_id')
         logger.info(f"📦 任务ID: {task_id}")
         if not task_id:
+            logger.error(f"❌ 该记录没有关联的任务图片")
             return jsonify({
                 "success": False,
-                "error": "该记录没有关联的任务图片"
+                "error": "该作品尚未生成图片,无法下载"
             }), 404
 
         # 获取任务目录
