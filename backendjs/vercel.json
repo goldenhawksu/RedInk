@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "name": "redink-backendjs",
+  "builds": [
+    {
+      "src": "backendjs/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backendjs/dist/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "12399"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
+}
