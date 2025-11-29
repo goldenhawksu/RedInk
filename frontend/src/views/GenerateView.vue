@@ -262,6 +262,7 @@ onMounted(async () => {
       // 更新历史记录
       if (store.recordId) {
         try {
+          console.log('🔄 准备更新历史记录:', store.recordId)
           // 收集所有生成的图片文件名
           const generatedImages = event.images.filter(img => img !== null)
 
@@ -274,7 +275,14 @@ onMounted(async () => {
           // 获取封面图作为缩略图（只保存文件名，不是完整URL）
           const thumbnail = generatedImages.length > 0 ? generatedImages[0] : null
 
-          await updateHistory(store.recordId, {
+          console.log('📝 更新历史记录数据:', {
+            task_id: event.task_id,
+            generated_count: generatedImages.length,
+            status,
+            thumbnail
+          })
+
+          const result = await updateHistory(store.recordId, {
             images: {
               task_id: event.task_id,
               generated: generatedImages
@@ -282,10 +290,18 @@ onMounted(async () => {
             status: status,
             thumbnail: thumbnail
           })
-          console.log('历史记录已更新')
+
+          console.log('✅ 历史记录更新结果:', result)
+          if (!result.success) {
+            console.error('❌ 历史记录更新失败:', result.error)
+            alert('历史记录更新失败: ' + (result.error || '未知错误'))
+          }
         } catch (e) {
-          console.error('更新历史记录失败:', e)
+          console.error('❌ 更新历史记录异常:', e)
+          alert('更新历史记录失败: ' + String(e))
         }
+      } else {
+        console.warn('⚠️ 没有recordId,跳过历史记录更新')
       }
 
       // 如果没有失败的，跳转到结果页
