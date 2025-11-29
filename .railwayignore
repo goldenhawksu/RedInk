@@ -19,7 +19,7 @@ test/
 
 # 忽略其他非必需文件
 .spec-workflow/
-history/
+# history/  # 注释掉:运行时需要此目录存储生成的图片
 .git/
 .gitignore
 .vscode/
