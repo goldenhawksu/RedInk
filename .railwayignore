@@ -1,8 +1,12 @@
 # 忽略 Python 后端
 backend/
 *.py
+*.pyc
+__pycache__/
 pyproject.toml
 uv.lock
+.venv/
+venv/
 
 # 忽略前端（已在构建中处理）
 frontend/
@@ -14,6 +18,7 @@ deno-backend/
 docs/
 test/
 *.md
+!package.json
 
 # 忽略其他非必需文件
 .spec-workflow/
@@ -21,3 +26,5 @@ history/
 docker/
 Dockerfile.python-backend
 docker-compose.yml
+.git/
+.gitignore
