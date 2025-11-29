@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const API_BASE_URL = '/api'
+// 从环境变量读取 API 基础 URL
+// 生产环境：连接 Railway 后端
+// 开发环境：使用代理连接本地后端
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export interface Page {
   index: number

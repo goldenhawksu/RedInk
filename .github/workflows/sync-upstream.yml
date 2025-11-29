@@ -1,0 +1,65 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每周日 00:00 UTC 运行 (北京时间周日 08:00)
+    - cron: '0 0 * * 0'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 需要写权限来推送
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/HisMax/RedInk.git || true
+          git fetch upstream
+
+      - name: Check for new commits
+        id: check
+        run: |
+          NEW_COMMITS=$(git log HEAD..upstream/main --oneline)
+          if [ -z "$NEW_COMMITS" ]; then
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "✅ 已是最新版本，无需同步"
+          else
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "📝 发现新提交:"
+            echo "$NEW_COMMITS"
+          fi
+
+      - name: Merge upstream changes
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          git checkout main
+          git merge upstream/main --no-edit
+
+      - name: Push changes
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          git push origin main
+
+      - name: Create summary
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          echo "## 🔄 Upstream 同步成功" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "已同步以下提交:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          git log HEAD~5..HEAD --oneline >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
