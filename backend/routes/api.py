@@ -171,36 +171,59 @@ def generate_images():
 
 @api_bp.route('/images/<task_id>/<filename>', methods=['GET'])
 def get_image(task_id, filename):
-    """获取图片（支持缩略图）"""
+    """获取图片(支持缩略图)"""
     try:
         logger.debug(f"获取图片: {task_id}/{filename}")
         # 检查是否请求缩略图
         thumbnail = request.args.get('thumbnail', 'true').lower() == 'true'
 
-        # 直接构建路径，不需要初始化 ImageService
+        # 使用与ImageService相同的路径计算方式
         history_root = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             "history"
         )
+
+        logger.info(f"History root: {history_root}")
+        logger.info(f"History root exists: {os.path.exists(history_root)}")
 
         if thumbnail:
             # 尝试返回缩略图
             thumb_filename = f"thumb_{filename}"
             thumb_filepath = os.path.join(history_root, task_id, thumb_filename)
 
-            # 如果缩略图存在，返回缩略图
+            logger.info(f"Thumbnail path: {thumb_filepath}")
+            logger.info(f"Thumbnail exists: {os.path.exists(thumb_filepath)}")
+
+            # 如果缩略图存在,返回缩略图
             if os.path.exists(thumb_filepath):
+                logger.info(f"✅ 返回缩略图: {thumb_filename}")
                 return send_file(thumb_filepath, mimetype='image/png')
 
         # 返回原图
         filepath = os.path.join(history_root, task_id, filename)
 
+        logger.info(f"Image path: {filepath}")
+        logger.info(f"Image exists: {os.path.exists(filepath)}")
+
         if not os.path.exists(filepath):
+            # 列出目录内容以调试
+            task_dir = os.path.join(history_root, task_id)
+            if os.path.exists(task_dir):
+                files = os.listdir(task_dir)
+                logger.error(f"❌ 图片不存在,但任务目录存在。目录内容: {files}")
+            else:
+                logger.error(f"❌ 任务目录不存在: {task_dir}")
+                # 列出history根目录内容
+                if os.path.exists(history_root):
+                    root_dirs = os.listdir(history_root)
+                    logger.error(f"History根目录内容: {root_dirs}")
+
             return jsonify({
                 "success": False,
-                "error": f"图片不存在：{task_id}/{filename}"
+                "error": f"图片不存在: {task_id}/{filename}"
             }), 404
 
+        logger.info(f"✅ 返回原图: {filename}")
         return send_file(filepath, mimetype='image/png')
 
     except Exception as e:
