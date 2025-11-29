@@ -103,6 +103,8 @@ class ImageService:
         filepath = os.path.join(task_dir, filename)
         with open(filepath, "wb") as f:
             f.write(image_data)
+        logger.info(f"📁 图片已保存: {filepath} ({len(image_data)} bytes)")
+        logger.info(f"📂 文件存在检查: {os.path.exists(filepath)}")
 
         # 生成缩略图（50KB左右）
         thumbnail_data = compress_image(image_data, max_size_kb=50)
@@ -110,6 +112,7 @@ class ImageService:
         thumbnail_path = os.path.join(task_dir, thumbnail_filename)
         with open(thumbnail_path, "wb") as f:
             f.write(thumbnail_data)
+        logger.info(f"🖼️  缩略图已保存: {thumbnail_path} ({len(thumbnail_data)} bytes)")
 
         return filepath
 
@@ -254,7 +257,8 @@ class ImageService:
         # 创建任务专属目录
         self.current_task_dir = os.path.join(self.history_root_dir, task_id)
         os.makedirs(self.current_task_dir, exist_ok=True)
-        logger.debug(f"任务目录: {self.current_task_dir}")
+        logger.info(f"📂 任务目录已创建: {self.current_task_dir}")
+        logger.info(f"📂 目录存在检查: {os.path.exists(self.current_task_dir)}")
 
         total = len(pages)
         generated_images = []
@@ -548,6 +552,7 @@ class ImageService:
         """
         self.current_task_dir = os.path.join(self.history_root_dir, task_id)
         os.makedirs(self.current_task_dir, exist_ok=True)
+        logger.info(f"📂 重试任务目录: {self.current_task_dir}")
 
         reference_image = None
         user_images = None
