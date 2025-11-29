@@ -643,16 +643,19 @@ def scan_all_tasks():
 def download_history_zip(record_id):
     """下载历史记录的所有图片为 ZIP 文件"""
     try:
+        logger.info(f"📦 开始下载历史记录: {record_id}")
         history_service = get_history_service()
         record = history_service.get_record(record_id)
 
         if not record:
+            logger.error(f"❌ 历史记录不存在: {record_id}")
             return jsonify({
                 "success": False,
                 "error": f"历史记录不存在：{record_id}"
             }), 404
 
         task_id = record.get('images', {}).get('task_id')
+        logger.info(f"📦 任务ID: {task_id}")
         if not task_id:
             return jsonify({
                 "success": False,
@@ -661,7 +664,10 @@ def download_history_zip(record_id):
 
         # 获取任务目录
         task_dir = os.path.join(history_service.history_dir, task_id)
+        logger.info(f"📦 任务目录: {task_dir}")
+        logger.info(f"📦 目录存在: {os.path.exists(task_dir)}")
         if not os.path.exists(task_dir):
+            logger.error(f"❌ 任务目录不存在: {task_dir}")
             return jsonify({
                 "success": False,
                 "error": f"任务目录不存在：{task_id}"
@@ -669,6 +675,7 @@ def download_history_zip(record_id):
 
         # 创建内存中的 ZIP 文件
         memory_file = io.BytesIO()
+        file_count = 0
         with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
             # 遍历任务目录中的所有图片（排除缩略图）
             for filename in os.listdir(task_dir):
@@ -685,6 +692,10 @@ def download_history_zip(record_id):
                         archive_name = filename
 
                     zf.write(file_path, archive_name)
+                    file_count += 1
+                    logger.info(f"📦 添加文件到ZIP: {filename} -> {archive_name}")
+
+        logger.info(f"📦 ZIP文件创建完成，共 {file_count} 个文件")
 
         # 将指针移到开始位置
         memory_file.seek(0)
