@@ -10,9 +10,16 @@ test/
 docs/
 *.md
 
+# 忽略 Railway 相关配置
+package.json
+package-lock.json
+railway.json
+.railwayignore
+
 # 忽略其他非前端文件
 .spec-workflow/
 history/
 docker/
 Dockerfile
+Dockerfile.python-backend
 docker-compose.yml
