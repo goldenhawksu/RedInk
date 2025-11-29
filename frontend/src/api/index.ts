@@ -5,6 +5,30 @@ import axios from 'axios'
 // 开发环境：使用代理连接本地后端
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
+// 提取基础域名(用于图片URL转换)
+// 例如: https://redink-backend.up.railway.app/api -> https://redink-backend.up.railway.app
+const BASE_DOMAIN = API_BASE_URL.replace(/\/api$/, '')
+
+/**
+ * 标准化图片URL
+ * 将后端返回的相对路径转换为完整URL
+ */
+export function normalizeImageUrl(url: string): string {
+  if (!url) return url
+
+  // 如果已经是完整URL,直接返回
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  // 如果是相对路径,添加BASE_DOMAIN前缀
+  if (url.startsWith('/api/')) {
+    return `${BASE_DOMAIN}${url}`
+  }
+
+  return url
+}
+
 export interface Page {
   index: number
   type: 'cover' | 'content' | 'summary'

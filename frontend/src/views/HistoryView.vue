@@ -115,7 +115,7 @@
         <div class="card-cover" @click="viewImages(record.id)">
           <img
             v-if="record.thumbnail && record.task_id"
-            :src="`/api/images/${record.task_id}/${record.thumbnail}`"
+            :src="normalizeImageUrl(`/api/images/${record.task_id}/${record.thumbnail}`)"
             alt="cover"
             loading="lazy"
             decoding="async"
@@ -218,7 +218,7 @@
                 <!-- 图片预览区域 -->
                 <div class="modal-img-preview" v-if="img">
                   <img
-                    :src="`/api/images/${viewingRecord.images.task_id}/${img}`"
+                    :src="normalizeImageUrl(`/api/images/${viewingRecord.images.task_id}/${img}`)"
                     loading="lazy"
                     decoding="async"
                   />
@@ -273,7 +273,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getHistoryList, getHistoryStats, searchHistory, deleteHistory, getHistory, type HistoryRecord, regenerateImage as apiRegenerateImage, updateHistory, scanAllTasks } from '../api'
+import {
+  getHistoryList,
+  getHistoryStats,
+  searchHistory,
+  deleteHistory,
+  getHistory,
+  type HistoryRecord,
+  regenerateImage as apiRegenerateImage,
+  updateHistory,
+  scanAllTasks,
+  normalizeImageUrl  // 导入URL转换函数
+} from '../api'
 import { useGeneratorStore } from '../stores/generator'
 
 const router = useRouter()
@@ -489,7 +500,7 @@ async function regenerateHistoryImage(index: number) {
 function downloadImage(filename: string, index: number) {
   if (!viewingRecord.value) return
   const link = document.createElement('a')
-  link.href = `/api/images/${viewingRecord.value.images.task_id}/${filename}?thumbnail=false`
+  link.href = normalizeImageUrl(`/api/images/${viewingRecord.value.images.task_id}/${filename}?thumbnail=false`)
   link.download = `page_${index + 1}.png`
   link.click()
 }
@@ -500,7 +511,7 @@ async function downloadAllImages() {
 
   // 调用 ZIP 下载接口
   const link = document.createElement('a')
-  link.href = `/api/history/${viewingRecord.value.id}/download`
+  link.href = normalizeImageUrl(`/api/history/${viewingRecord.value.id}/download`)
   link.click()
 }
 
