@@ -1,0 +1,18 @@
+# 忽略 Python 后端
+backend/
+backendjs/
+
+# 忽略 Deno 后端
+deno-backend/
+
+# 忽略测试和文档
+test/
+docs/
+*.md
+
+# 忽略其他非前端文件
+.spec-workflow/
+history/
+docker/
+Dockerfile
+docker-compose.yml
