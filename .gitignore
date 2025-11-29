@@ -74,3 +74,10 @@ htmlcov/
 *.temp
 test_*.py
 debug_*.py
+
+# CC 工作流
+.spec-workflow/
+
+# 测试文件&过程文档
+docs/
+test/
