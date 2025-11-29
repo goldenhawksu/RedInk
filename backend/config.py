@@ -9,7 +9,11 @@ class Config:
     DEBUG = True
     HOST = '0.0.0.0'
     PORT = 12398
-    CORS_ORIGINS = ['http://localhost:5173', 'http://localhost:3000']
+    CORS_ORIGINS = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://redink-self.vercel.app',  # Vercel 前端域名
+    ]
     OUTPUT_DIR = 'output'
 
     _image_providers_config = None

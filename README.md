@@ -1,17 +1,17 @@
 # RedInk - 小红书 AI 图文生成器
 
 ![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)
-![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)
+![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![Vue 3](https://img.shields.io/badge/vue-3.x-green.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)
+![Flask](https://img.shields.io/badge/flask-3.x-lightgrey.svg)
 
 > 基于 Google Gemini 的智能小红书图文内容生成工具
 
 **本项目 Fork 自 [HisMax/RedInk](https://github.com/HisMax/RedInk)，并进行了以下改进：**
-- ✅ 使用 Node.js/TypeScript 重写后端，替代原 Python 版本
 - ✅ 支持 Vercel + Railway 分离部署
 - ✅ 前后端完全解耦，易于维护和扩展
-- ✅ 支持 upstream 仓库同步，持续获取上游更新
+- ✅ 支持 upstream 仓库同步，自动获取上游更新
+- ✅ Docker 多阶段构建，优化部署效率
 
 ---
 
@@ -36,17 +36,26 @@ RedInk/
 │   │   └── stores/       # Pinia 状态管理
 │   └── dist/         # 构建输出
 │
-├── backendjs/        # Node.js/TypeScript 后端 (Railway 部署)
+├── backendjs/        # Node.js/TypeScript 后端 (已弃用)
 │   ├── src/
 │   │   ├── routes/       # Express 路由
 │   │   ├── services/     # 业务逻辑
 │   │   └── config/       # 配置管理
 │   └── dist/         # 构建输出
 │
+├── backend/          # Python/Flask 后端 (Railway 部署)
+│   ├── routes/       # Flask 路由
+│   ├── services/     # 业务逻辑
+│   ├── generators/   # AI 生成器
+│   └── utils/        # 工具函数
+│
 ├── docs/             # 项目文档
 │   ├── deployment/   # 部署相关文档
+│   ├── RAILWAY_PYTHON_DEPLOYMENT.md  # Python 后端部署指南
 │   └── ORIGINAL_README.md  # 原项目 README
 │
+├── Dockerfile        # Railway Docker 构建配置
+├── railway.json      # Railway 部署配置
 └── config/           # 配置文件模板
 ```
 
@@ -70,30 +79,31 @@ RedInk/
    ```
 5. 点击 **Deploy**
 
-#### 后端部署到 Railway
+#### 后端部署到 Railway (Python)
 
 1. 访问 [Railway](https://railway.app)，创建新项目
-2. 连接你的 GitHub 仓库
-3. Railway 会自动检测并部署
+2. 连接你的 GitHub 仓库，选择 main 分支
+3. Railway 会自动检测 `Dockerfile` 并构建部署
 4. 添加环境变量：
    ```
    TEXT_API_KEY=your-text-api-key
    TEXT_BASE_URL=https://api.openai.com/v1
    IMAGE_API_KEY=your-image-api-key
    IMAGE_BASE_URL=https://api.openai.com/v1
-   PORT=3000
    ```
-5. 复制 Railway 生成的域名，更新 Vercel 的 `VITE_API_BASE_URL`
+5. 在 Settings → Networking 中生成域名
+6. 复制 Railway 域名，更新 Vercel 的 `VITE_API_BASE_URL`
 
-**详细部署指南**: 查看 [docs/QUICK_START.md](./docs/QUICK_START.md)
+**详细部署指南**: 查看 [docs/RAILWAY_PYTHON_DEPLOYMENT.md](./docs/RAILWAY_PYTHON_DEPLOYMENT.md)
 
 ---
 
 ## 💻 本地开发
 
 ### 前置要求
+- Python 3.11+
 - Node.js 18+
-- npm 或 pnpm
+- uv (Python 包管理器)
 
 ### 1. 克隆项目
 ```bash
@@ -111,8 +121,12 @@ npm install
 
 **后端:**
 ```bash
-cd backendjs
-npm install
+cd backend
+# 安装 uv
+pip install uv
+
+# 安装依赖
+uv sync
 ```
 
 ### 3. 配置环境变量
@@ -122,21 +136,23 @@ npm install
 VITE_API_BASE_URL=/api
 ```
 
-**后端 (backendjs/.env):**
-```env
-TEXT_API_KEY=your-api-key
-TEXT_BASE_URL=https://api.openai.com/v1
-IMAGE_API_KEY=your-api-key
-IMAGE_BASE_URL=https://api.openai.com/v1
-PORT=12398
+**后端配置文件:**
+复制配置模板：
+```bash
+cp docker/text_providers.yaml ./
+cp docker/image_providers.yaml ./
 ```
+
+编辑 `text_providers.yaml` 和 `image_providers.yaml`，填入你的 API Key。
 
 ### 4. 启动服务
 
 **启动后端** (终端 1):
 ```bash
-cd backendjs
-npm run dev
+cd backend
+uv run python -m backend.app
+# 或者
+python -m backend.app
 ```
 
 **启动前端** (终端 2):
