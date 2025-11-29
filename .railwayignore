@@ -1,0 +1,23 @@
+# 忽略 Python 后端
+backend/
+*.py
+pyproject.toml
+uv.lock
+
+# 忽略前端（已在构建中处理）
+frontend/
+
+# 忽略 Deno 后端
+deno-backend/
+
+# 忽略文档和测试
+docs/
+test/
+*.md
+
+# 忽略其他非必需文件
+.spec-workflow/
+history/
+docker/
+Dockerfile.python-backend
+docker-compose.yml
