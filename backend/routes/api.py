@@ -764,28 +764,22 @@ def _prepare_providers_for_response(providers: dict) -> dict:
 def get_config():
     """获取当前配置"""
     try:
-        from pathlib import Path
-        import yaml
+        from backend.utils.persistent_config import get_persistent_config_manager
 
-        # 读取图片生成配置
-        image_config_path = Path(__file__).parent.parent.parent / 'image_providers.yaml'
-        if image_config_path.exists():
-            with open(image_config_path, 'r', encoding='utf-8') as f:
-                image_config = yaml.safe_load(f) or {}
-        else:
+        persistent_manager = get_persistent_config_manager()
+
+        # 从持久化存储读取配置
+        image_config = persistent_manager.load_provider_config('image')
+        if not image_config:
             image_config = {
-                'active_provider': 'google_genai',
+                'active_provider': 'default',
                 'providers': {}
             }
 
-        # 读取文本生成配置
-        text_config_path = Path(__file__).parent.parent.parent / 'text_providers.yaml'
-        if text_config_path.exists():
-            with open(text_config_path, 'r', encoding='utf-8') as f:
-                text_config = yaml.safe_load(f) or {}
-        else:
+        text_config = persistent_manager.load_provider_config('text')
+        if not text_config:
             text_config = {
-                'active_provider': 'google_gemini',
+                'active_provider': 'default',
                 'providers': {}
             }
 
@@ -814,20 +808,20 @@ def get_config():
 def update_config():
     """更新配置"""
     try:
-        from pathlib import Path
-        import yaml
+        from backend.utils.persistent_config import get_persistent_config_manager
 
         data = request.get_json()
+        persistent_manager = get_persistent_config_manager()
+
+        # 用于设备绑定的配置
+        text_config = None
+        image_config = None
 
         # 更新图片生成配置
         if 'image_generation' in data:
-            image_config_path = Path(__file__).parent.parent.parent / 'image_providers.yaml'
-
-            # 读取现有配置
-            if image_config_path.exists():
-                with open(image_config_path, 'r', encoding='utf-8') as f:
-                    image_config = yaml.safe_load(f) or {}
-            else:
+            # 读取现有配置(从持久化存储)
+            image_config = persistent_manager.load_provider_config('image')
+            if not image_config:
                 image_config = {'providers': {}}
 
             image_gen_data = data['image_generation']
@@ -852,22 +846,17 @@ def update_config():
 
                 image_config['providers'] = new_providers
 
-            # 保存配置
-            with open(image_config_path, 'w', encoding='utf-8') as f:
-                yaml.dump(image_config, f, allow_unicode=True, default_flow_style=False)
+            # 保存到持久化存储
+            persistent_manager.save_provider_config('image', image_config)
 
         # 更新文本生成配置
         if 'text_generation' in data:
-            text_gen_data = data['text_generation']
-            text_config_path = Path(__file__).parent.parent.parent / 'text_providers.yaml'
-
-            # 读取现有配置
-            if text_config_path.exists():
-                with open(text_config_path, 'r', encoding='utf-8') as f:
-                    text_config = yaml.safe_load(f) or {}
-            else:
+            # 读取现有配置(从持久化存储)
+            text_config = persistent_manager.load_provider_config('text')
+            if not text_config:
                 text_config = {'providers': {}}
 
+            text_gen_data = data['text_generation']
             if 'active_provider' in text_gen_data:
                 text_config['active_provider'] = text_gen_data['active_provider']
 
@@ -889,9 +878,8 @@ def update_config():
 
                 text_config['providers'] = new_providers
 
-            # 保存配置
-            with open(text_config_path, 'w', encoding='utf-8') as f:
-                yaml.dump(text_config, f, allow_unicode=True, default_flow_style=False)
+            # 保存到持久化存储
+            persistent_manager.save_provider_config('text', text_config)
 
         # 清除配置缓存，确保下次使用时读取新配置
         from backend.config import Config
@@ -905,7 +893,7 @@ def update_config():
         device_id = request.headers.get('X-Device-ID')
         if device_id:
             # 绑定文本服务
-            if 'text_generation' in data:
+            if text_config and 'text_generation' in data:
                 text_binding_manager = get_text_binding_manager()
                 active_provider = text_config.get('active_provider', 'default')
                 success, message = text_binding_manager.bind_device(
@@ -919,7 +907,7 @@ def update_config():
                     logger.warning(f"⚠️ 文本服务设备绑定失败: {message}")
 
             # 绑定图片服务
-            if 'image_generation' in data:
+            if image_config and 'image_generation' in data:
                 image_binding_manager = get_image_binding_manager()
                 active_provider = image_config.get('active_provider', 'default')
                 success, message = image_binding_manager.bind_device(
