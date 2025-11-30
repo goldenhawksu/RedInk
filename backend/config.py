@@ -38,69 +38,50 @@ class Config:
 
     @classmethod
     def load_image_providers_config(cls):
+        """加载图片服务商配置(从持久化存储)"""
         if cls._image_providers_config is not None:
             return cls._image_providers_config
 
-        config_path = Path(__file__).parent.parent / 'image_providers.yaml'
-        logger.debug(f"加载图片服务商配置: {config_path}")
+        from backend.utils.persistent_config import get_persistent_config_manager
 
-        if not config_path.exists():
-            logger.warning(f"图片配置文件不存在: {config_path}，使用默认配置")
-            cls._image_providers_config = {
-                'active_provider': 'google_genai',
-                'providers': {}
-            }
+        logger.debug("从持久化存储加载图片服务商配置...")
+        persistent_manager = get_persistent_config_manager()
+        config = persistent_manager.load_provider_config('image')
+
+        if config:
+            cls._image_providers_config = config
+            logger.debug(f"图片配置加载成功: {list(config.get('providers', {}).keys())}")
             return cls._image_providers_config
 
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                cls._image_providers_config = yaml.safe_load(f) or {}
-            logger.debug(f"图片配置加载成功: {list(cls._image_providers_config.get('providers', {}).keys())}")
-        except yaml.YAMLError as e:
-            logger.error(f"图片配置文件 YAML 格式错误: {e}")
-            raise ValueError(
-                f"配置文件格式错误: image_providers.yaml\n"
-                f"YAML 解析错误: {e}\n"
-                "解决方案：\n"
-                "1. 检查 YAML 缩进是否正确（使用空格，不要用Tab）\n"
-                "2. 检查引号是否配对\n"
-                "3. 使用在线 YAML 验证器检查格式"
-            )
-
+        logger.warning("未找到持久化的图片配置，使用默认配置")
+        cls._image_providers_config = {
+            'active_provider': 'default',
+            'providers': {}
+        }
         return cls._image_providers_config
 
     @classmethod
     def load_text_providers_config(cls):
-        """加载文本生成服务商配置"""
+        """加载文本生成服务商配置(从持久化存储)"""
         if cls._text_providers_config is not None:
             return cls._text_providers_config
 
-        config_path = Path(__file__).parent.parent / 'text_providers.yaml'
-        logger.debug(f"加载文本服务商配置: {config_path}")
+        from backend.utils.persistent_config import get_persistent_config_manager
 
-        if not config_path.exists():
-            logger.warning(f"文本配置文件不存在: {config_path}，使用默认配置")
-            cls._text_providers_config = {
-                'active_provider': 'google_gemini',
-                'providers': {}
-            }
+        logger.debug("从持久化存储加载文本服务商配置...")
+        persistent_manager = get_persistent_config_manager()
+        config = persistent_manager.load_provider_config('text')
+
+        if config:
+            cls._text_providers_config = config
+            logger.debug(f"文本配置加载成功: {list(config.get('providers', {}).keys())}")
             return cls._text_providers_config
 
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                cls._text_providers_config = yaml.safe_load(f) or {}
-            logger.debug(f"文本配置加载成功: {list(cls._text_providers_config.get('providers', {}).keys())}")
-        except yaml.YAMLError as e:
-            logger.error(f"文本配置文件 YAML 格式错误: {e}")
-            raise ValueError(
-                f"配置文件格式错误: text_providers.yaml\n"
-                f"YAML 解析错误: {e}\n"
-                "解决方案：\n"
-                "1. 检查 YAML 缩进是否正确（使用空格，不要用Tab）\n"
-                "2. 检查引号是否配对\n"
-                "3. 使用在线 YAML 验证器检查格式"
-            )
-
+        logger.warning("未找到持久化的文本配置，使用默认配置")
+        cls._text_providers_config = {
+            'active_provider': 'default',
+            'providers': {}
+        }
         return cls._text_providers_config
 
     @classmethod

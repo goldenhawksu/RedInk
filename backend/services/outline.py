@@ -19,32 +19,25 @@ class OutlineService:
         logger.info(f"OutlineService 初始化完成，使用服务商: {self.text_config.get('active_provider')}")
 
     def _load_text_config(self) -> dict:
-        """加载文本生成配置"""
-        config_path = Path(__file__).parent.parent.parent / 'text_providers.yaml'
-        logger.debug(f"加载文本配置: {config_path}")
+        """加载文本生成配置(从持久化存储)"""
+        from backend.utils.persistent_config import get_persistent_config_manager
 
-        if config_path.exists():
-            try:
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    config = yaml.safe_load(f) or {}
-                logger.debug(f"文本配置加载成功: active={config.get('active_provider')}")
-                return config
-            except yaml.YAMLError as e:
-                logger.error(f"文本配置 YAML 解析失败: {e}")
-                raise ValueError(
-                    f"文本配置文件格式错误: text_providers.yaml\n"
-                    f"YAML 解析错误: {e}\n"
-                    "解决方案：检查 YAML 缩进和语法"
-                )
+        logger.debug("从持久化存储加载文本配置...")
+        persistent_manager = get_persistent_config_manager()
+        config = persistent_manager.load_provider_config('text')
 
-        logger.warning("text_providers.yaml 不存在，使用默认配置")
+        if config:
+            logger.debug(f"文本配置加载成功: active={config.get('active_provider')}")
+            return config
+
+        logger.warning("未找到持久化的文本配置，使用默认配置")
         # 默认配置
         return {
-            'active_provider': 'google_gemini',
+            'active_provider': 'default',
             'providers': {
-                'google_gemini': {
+                'default': {
                     'type': 'google_gemini',
-                    'model': 'gemini-2.0-flash-exp',
+                    'model': 'gemini-2.5-flash',
                     'temperature': 1.0,
                     'max_output_tokens': 8000
                 }
