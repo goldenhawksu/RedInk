@@ -1004,19 +1004,35 @@ def test_connection():
         test_prompt = "请回复'你好，红墨'"
 
         if provider_type == 'google_genai':
-            # 图片生成服务商：仅验证API Key格式，不实际调用API
-            # 因为图片生成API可能不支持 models.list() 等测试接口
-            if not config['api_key'] or len(config['api_key']) < 20:
+            from google import genai
+            from google.genai import types
+            # 图片生成服务商：仅测试连接，不实际生成
+            if config.get('base_url'):
+                # 有自定义 base_url，可以测试连接
+                client = genai.Client(
+                    api_key=config['api_key'],
+                    http_options={
+                        'base_url': config['base_url'],
+                        'api_version': 'v1beta'
+                    },
+                    vertexai=False
+                )
+                # 简单测试：列出可用模型
+                try:
+                    models = list(client.models.list())
+                    return jsonify({
+                        "success": True,
+                        "message": "连接成功！仅代表连接稳定，不确定是否可以稳定支持图片生成"
+                    })
+                except Exception as e:
+                    raise Exception(f"连接测试失败: {str(e)}")
+            else:
+                # 使用标准 Vertex AI，无法用 API Key 测试
+                # 直接返回提示，说明需要在实际使用时验证
                 return jsonify({
-                    "success": False,
-                    "error": "API Key 格式无效（长度过短）"
-                }), 400
-
-            # API Key格式看起来合法，返回成功
-            return jsonify({
-                "success": True,
-                "message": "✅ API Key 格式验证通过！\n\n⚠️ 注意：图片生成服务无法预先测试连接，请在实际生成图片时验证配置是否正确。"
-            })
+                    "success": True,
+                    "message": "Vertex AI 无法通过 API Key 测试连接（需要 OAuth2 认证）。请在实际生成图片时验证配置是否正确。"
+                })
 
         elif provider_type in ['openai_compatible', 'image_api']:
             import requests
