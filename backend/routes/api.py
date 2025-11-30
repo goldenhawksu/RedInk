@@ -936,57 +936,51 @@ def update_config():
 def test_connection():
     """测试服务商连接"""
     try:
-        from pathlib import Path
-        import yaml
+        from backend.utils.persistent_config import get_persistent_config_manager
 
         data = request.get_json()
         provider_type = data.get('type')
-        provider_name = data.get('provider_name')  # 服务商名称（用于从配置文件读取 API Key）
+        provider_name = data.get('provider_name')  # 服务商名称
         config = {
             'api_key': data.get('api_key'),
             'base_url': data.get('base_url'),
             'model': data.get('model')
         }
 
-        # 如果没有提供 api_key 或 api_key 为空，从配置文件读取
+        logger.info(f"🧪 测试连接请求: type={provider_type}, provider={provider_name}")
+        logger.debug(f"🔑 API Key是否提供: {bool(config['api_key'])}")
+
+        # 如果没有提供 api_key 或 api_key 为空，从持久化存储读取
         if not config['api_key'] and provider_name:
-            # 根据类型读取对应的配置文件
-            if provider_type in ['google_genai', 'google_gemini']:
-                config_path = Path(__file__).parent.parent.parent / 'image_providers.yaml'
-                if provider_type in ['google_gemini', 'openai_compatible']:
-                    config_path = Path(__file__).parent.parent.parent / 'text_providers.yaml'
+            persistent_manager = get_persistent_config_manager()
 
-                if config_path.exists():
-                    with open(config_path, 'r', encoding='utf-8') as f:
-                        yaml_config = yaml.safe_load(f) or {}
-                        providers = yaml_config.get('providers', {})
-                        if provider_name in providers:
-                            config['api_key'] = providers[provider_name].get('api_key')
-                            # 如果配置文件中有其他参数，也读取
-                            if not config['base_url']:
-                                config['base_url'] = providers[provider_name].get('base_url')
-                            if not config['model']:
-                                config['model'] = providers[provider_name].get('model')
-            else:
-                # openai_compatible 和 image_api 类型
-                if provider_type in ['openai_compatible']:
-                    config_path = Path(__file__).parent.parent.parent / 'text_providers.yaml'
+            # 根据类型读取对应的配置
+            config_type = 'text' if provider_type in ['google_gemini', 'openai_compatible'] else 'image'
+            saved_config = persistent_manager.load_provider_config(config_type)
+
+            logger.info(f"📂 从持久化存储读取{config_type}配置")
+
+            if saved_config and 'providers' in saved_config:
+                providers = saved_config['providers']
+                if provider_name in providers:
+                    provider_config = providers[provider_name]
+                    config['api_key'] = provider_config.get('api_key')
+                    if not config['base_url']:
+                        config['base_url'] = provider_config.get('base_url')
+                    if not config['model']:
+                        config['model'] = provider_config.get('model')
+
+                    logger.info(f"✅ 成功从持久化存储读取API Key: {bool(config['api_key'])}")
                 else:
-                    config_path = Path(__file__).parent.parent.parent / 'image_providers.yaml'
-
-                if config_path.exists():
-                    with open(config_path, 'r', encoding='utf-8') as f:
-                        yaml_config = yaml.safe_load(f) or {}
-                        providers = yaml_config.get('providers', {})
-                        if provider_name in providers:
-                            config['api_key'] = providers[provider_name].get('api_key')
-                            if not config['base_url']:
-                                config['base_url'] = providers[provider_name].get('base_url')
-                            if not config['model']:
-                                config['model'] = providers[provider_name].get('model')
+                    logger.warning(f"⚠️ 持久化存储中未找到服务商: {provider_name}")
+            else:
+                logger.warning(f"⚠️ 持久化存储中没有{config_type}配置")
 
         if not config['api_key']:
+            logger.error("❌ API Key未配置")
             return jsonify({"success": False, "error": "API Key 未配置"}), 400
+
+        logger.info(f"🚀 开始测试连接: base_url={config.get('base_url')}, model={config.get('model')}")
 
         # 统一的测试提示词（仅用于文本生成服务商）
         test_prompt = "请回复'你好，红墨'"
@@ -1118,7 +1112,12 @@ def test_connection():
                 })
 
         else:
+            logger.error(f"❌ 不支持的服务类型: {provider_type}")
             raise ValueError(f"不支持的类型: {provider_type}")
 
     except Exception as e:
+        logger.error(f"❌ 测试连接失败: {str(e)}")
+        logger.error(f"   错误类型: {type(e).__name__}")
+        import traceback
+        logger.debug(f"   堆栈跟踪:\n{traceback.format_exc()}")
         return jsonify({"success": False, "error": str(e)}), 400
