@@ -211,10 +211,14 @@ export async function retryFailedImages(
   onStreamError: (error: Error) => void
 ) {
   try {
+    // 获取设备ID
+    const deviceId = await getDeviceId()
+
     const response = await fetch(`${API_BASE_URL}/retry-failed`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Device-ID': deviceId,
       },
       body: JSON.stringify({
         task_id: taskId,
@@ -411,6 +415,9 @@ export async function generateImagesPost(
   userTopic?: string
 ) {
   try {
+    // 获取设备ID
+    const deviceId = await getDeviceId()
+
     // 将用户图片转换为 base64
     let userImagesBase64: string[] = []
     if (userImages && userImages.length > 0) {
@@ -430,6 +437,7 @@ export async function generateImagesPost(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Device-ID': deviceId,
       },
       body: JSON.stringify({
         pages,
