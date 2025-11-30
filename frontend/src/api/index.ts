@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getDeviceId } from '../utils/deviceFingerprint'
 
 // 从环境变量读取 API 基础 URL
 // 生产环境：连接 Railway 后端
@@ -8,6 +9,24 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 // 提取基础域名(用于图片URL转换)
 // 例如: https://redink-backend.up.railway.app/api -> https://redink-backend.up.railway.app
 const BASE_DOMAIN = API_BASE_URL.replace(/\/api$/, '')
+
+// 创建axios实例
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL
+})
+
+// 请求拦截器:自动附加设备ID
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    // 获取设备ID并添加到请求头
+    const deviceId = await getDeviceId()
+    config.headers['X-Device-ID'] = deviceId
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 /**
  * 标准化图片URL
@@ -70,7 +89,7 @@ export async function generateOutline(
       formData.append('images', file)
     })
 
-    const response = await axios.post<OutlineResponse & { has_images?: boolean }>(
+    const response = await axiosInstance.post<OutlineResponse & { has_images?: boolean }>(
       `${API_BASE_URL}/outline`,
       formData,
       {
@@ -83,7 +102,7 @@ export async function generateOutline(
   }
 
   // 无图片，使用 JSON
-  const response = await axios.post<OutlineResponse>(`${API_BASE_URL}/outline`, {
+  const response = await axiosInstance.post<OutlineResponse>(`${API_BASE_URL}/outline`, {
     topic
   })
   return response.data
@@ -153,7 +172,7 @@ export async function retrySingleImage(
   page: Page,
   useReference: boolean = true
 ): Promise<{ success: boolean; index: number; image_url?: string; error?: string }> {
-  const response = await axios.post(`${API_BASE_URL}/retry`, {
+  const response = await axiosInstance.post(`${API_BASE_URL}/retry`, {
     task_id: taskId,
     page,
     use_reference: useReference
@@ -171,7 +190,7 @@ export async function regenerateImage(
     userTopic?: string
   }
 ): Promise<{ success: boolean; index: number; image_url?: string; error?: string }> {
-  const response = await axios.post(`${API_BASE_URL}/regenerate`, {
+  const response = await axiosInstance.post(`${API_BASE_URL}/regenerate`, {
     task_id: taskId,
     page,
     use_reference: useReference,
@@ -296,7 +315,7 @@ export async function createHistory(
   outline: { raw: string; pages: Page[] },
   taskId?: string
 ): Promise<{ success: boolean; record_id?: string; error?: string }> {
-  const response = await axios.post(`${API_BASE_URL}/history`, {
+  const response = await axiosInstance.post(`${API_BASE_URL}/history`, {
     topic,
     outline,
     task_id: taskId
@@ -320,7 +339,7 @@ export async function getHistoryList(
   const params: any = { page, page_size: pageSize }
   if (status) params.status = status
 
-  const response = await axios.get(`${API_BASE_URL}/history`, { params })
+  const response = await axiosInstance.get(`${API_BASE_URL}/history`, { params })
   return response.data
 }
 
@@ -330,7 +349,7 @@ export async function getHistory(recordId: string): Promise<{
   record?: HistoryDetail
   error?: string
 }> {
-  const response = await axios.get(`${API_BASE_URL}/history/${recordId}`)
+  const response = await axiosInstance.get(`${API_BASE_URL}/history/${recordId}`)
   return response.data
 }
 
@@ -344,7 +363,7 @@ export async function updateHistory(
     thumbnail?: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  const response = await axios.put(`${API_BASE_URL}/history/${recordId}`, data)
+  const response = await axiosInstance.put(`${API_BASE_URL}/history/${recordId}`, data)
   return response.data
 }
 
@@ -353,7 +372,7 @@ export async function deleteHistory(recordId: string): Promise<{
   success: boolean
   error?: string
 }> {
-  const response = await axios.delete(`${API_BASE_URL}/history/${recordId}`)
+  const response = await axiosInstance.delete(`${API_BASE_URL}/history/${recordId}`)
   return response.data
 }
 
@@ -362,7 +381,7 @@ export async function searchHistory(keyword: string): Promise<{
   success: boolean
   records: HistoryRecord[]
 }> {
-  const response = await axios.get(`${API_BASE_URL}/history/search`, {
+  const response = await axiosInstance.get(`${API_BASE_URL}/history/search`, {
     params: { keyword }
   })
   return response.data
@@ -374,7 +393,7 @@ export async function getHistoryStats(): Promise<{
   total: number
   by_status: Record<string, number>
 }> {
-  const response = await axios.get(`${API_BASE_URL}/history/stats`)
+  const response = await axiosInstance.get(`${API_BASE_URL}/history/stats`)
   return response.data
 }
 
@@ -489,7 +508,7 @@ export async function scanTask(taskId: string): Promise<{
   no_record?: boolean
   error?: string
 }> {
-  const response = await axios.get(`${API_BASE_URL}/history/scan/${taskId}`)
+  const response = await axiosInstance.get(`${API_BASE_URL}/history/scan/${taskId}`)
   return response.data
 }
 
@@ -503,7 +522,7 @@ export async function scanAllTasks(): Promise<{
   results?: any[]
   error?: string
 }> {
-  const response = await axios.post(`${API_BASE_URL}/history/scan-all`)
+  const response = await axiosInstance.post(`${API_BASE_URL}/history/scan-all`)
   return response.data
 }
 
@@ -526,7 +545,7 @@ export async function getConfig(): Promise<{
   config?: Config
   error?: string
 }> {
-  const response = await axios.get(`${API_BASE_URL}/config`)
+  const response = await axiosInstance.get(`${API_BASE_URL}/config`)
   return response.data
 }
 
@@ -536,7 +555,7 @@ export async function updateConfig(config: Partial<Config>): Promise<{
   message?: string
   error?: string
 }> {
-  const response = await axios.post(`${API_BASE_URL}/config`, config)
+  const response = await axiosInstance.post(`${API_BASE_URL}/config`, config)
   return response.data
 }
 
@@ -552,6 +571,6 @@ export async function testConnection(config: {
   message?: string
   error?: string
 }> {
-  const response = await axios.post(`${API_BASE_URL}/config/test`, config)
+  const response = await axiosInstance.post(`${API_BASE_URL}/config/test`, config)
   return response.data
 }

@@ -10,6 +10,7 @@ from flask import Blueprint, request, jsonify, Response, send_file
 from backend.services.outline import get_outline_service
 from backend.services.image import get_image_service
 from backend.services.history import get_history_service
+from backend.middleware.device_validator import require_device_binding, get_text_binding_manager, get_image_binding_manager
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ def _log_error(endpoint: str, error: Exception):
 
 
 @api_bp.route('/outline', methods=['POST'])
+@require_device_binding()  # 验证设备绑定
 def generate_outline():
     """生成大纲（支持图片上传）"""
     start_time = time.time()
@@ -100,6 +102,7 @@ def generate_outline():
 
 
 @api_bp.route('/generate', methods=['POST'])
+@require_device_binding(validate_image=True)  # 验证图片服务的设备绑定
 def generate_images():
     """生成图片（SSE 流式返回，支持用户上传参考图片）"""
     try:
@@ -898,9 +901,40 @@ def update_config():
         from backend.services.image import reset_image_service
         reset_image_service()
 
+        # 绑定设备(如果提供了设备ID)
+        device_id = request.headers.get('X-Device-ID')
+        if device_id:
+            # 绑定文本服务
+            if 'text_generation' in data:
+                text_binding_manager = get_text_binding_manager()
+                active_provider = text_config.get('active_provider', 'default')
+                success, message = text_binding_manager.bind_device(
+                    active_provider,
+                    device_id,
+                    device_name="当前设备"
+                )
+                if success:
+                    logger.info(f"✅ 文本服务设备绑定成功: {message}")
+                else:
+                    logger.warning(f"⚠️ 文本服务设备绑定失败: {message}")
+
+            # 绑定图片服务
+            if 'image_generation' in data:
+                image_binding_manager = get_image_binding_manager()
+                active_provider = image_config.get('active_provider', 'default')
+                success, message = image_binding_manager.bind_device(
+                    active_provider,
+                    device_id,
+                    device_name="当前设备"
+                )
+                if success:
+                    logger.info(f"✅ 图片服务设备绑定成功: {message}")
+                else:
+                    logger.warning(f"⚠️ 图片服务设备绑定失败: {message}")
+
         return jsonify({
             "success": True,
-            "message": "配置已保存"
+            "message": "配置已保存并绑定设备"
         })
 
     except Exception as e:
