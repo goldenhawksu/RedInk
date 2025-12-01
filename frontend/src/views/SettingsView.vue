@@ -1,8 +1,35 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1 class="page-title">系统设置</h1>
-      <p class="page-subtitle">配置文本生成和图片生成的 API 服务</p>
+      <div>
+        <h1 class="page-title">系统设置</h1>
+        <p class="page-subtitle">配置文本生成和图片生成的 API 服务</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-small" @click="exportConfig" title="导出配置">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          导出配置
+        </button>
+        <button class="btn btn-secondary btn-small" @click="triggerImportConfig" title="导入配置">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          导入配置
+        </button>
+        <input
+          type="file"
+          ref="fileInput"
+          @change="handleFileImport"
+          accept=".json"
+          style="display: none;"
+        />
+      </div>
     </div>
 
     <div v-if="loading" class="loading-container">
@@ -384,6 +411,7 @@ const loading = ref(true)
 const saving = ref(false)
 const testingText = ref(false)
 const testingImage = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
 
 // 文本生成配置
 const textConfig = ref<{
@@ -807,6 +835,105 @@ async function testImageProviderInList(name: string, provider: any) {
   }
 }
 
+// 导出配置
+function exportConfig() {
+  try {
+    // 构建配置对象
+    const configData = {
+      text_generation: {
+        active_provider: textConfig.value.active_provider,
+        providers: textConfig.value.providers
+      },
+      image_generation: imageConfig.value
+    }
+
+    // 转换为 JSON 字符串
+    const jsonStr = JSON.stringify(configData, null, 2)
+
+    // 创建 Blob
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+
+    // 创建下载链接
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+
+    // 生成文件名（包含时间戳）
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+    link.download = `redink-config-${timestamp}.json`
+
+    // 触发下载
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // 清理 URL
+    URL.revokeObjectURL(url)
+
+    alert('✅ 配置已成功导出')
+  } catch (e) {
+    alert('❌ 导出失败：' + String(e))
+  }
+}
+
+// 触发文件选择
+function triggerImportConfig() {
+  fileInput.value?.click()
+}
+
+// 处理文件导入
+async function handleFileImport(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  try {
+    // 读取文件内容
+    const fileContent = await file.text()
+    const importedConfig = JSON.parse(fileContent)
+
+    // 验证配置结构
+    if (!importedConfig.text_generation || !importedConfig.image_generation) {
+      alert('❌ 配置文件格式不正确，缺少必要字段')
+      return
+    }
+
+    if (!importedConfig.text_generation.providers || !importedConfig.image_generation.providers) {
+      alert('❌ 配置文件格式不正确，缺少 providers 字段')
+      return
+    }
+
+    // 确认导入
+    if (!confirm('确定要导入此配置吗？这将覆盖当前的所有配置。')) {
+      return
+    }
+
+    // 更新本地配置
+    textConfig.value = {
+      active_provider: importedConfig.text_generation.active_provider || '',
+      providers: importedConfig.text_generation.providers
+    }
+    imageConfig.value = importedConfig.image_generation
+
+    // 保存到服务器
+    await autoSaveConfig()
+
+    alert('✅ 配置已成功导入并保存')
+  } catch (e: any) {
+    if (e instanceof SyntaxError) {
+      alert('❌ 配置文件格式错误，请确保是有效的 JSON 文件')
+    } else {
+      alert('❌ 导入失败：' + String(e))
+    }
+  } finally {
+    // 清空 input，允许重复选择同一文件
+    input.value = ''
+  }
+}
+
 onMounted(() => {
   loadConfig()
 })
@@ -816,6 +943,18 @@ onMounted(() => {
 .settings-container {
   max-width: 900px;
   margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .section-header {
@@ -1195,6 +1334,21 @@ onMounted(() => {
 
 /* 响应式 */
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .table-header,
   .table-row {
     grid-template-columns: 70px 1fr 80px;

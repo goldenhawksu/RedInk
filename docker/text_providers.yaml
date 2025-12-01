@@ -3,8 +3,8 @@
 active_provider: default
 providers:
   default:
-    api_key: "sk-gpt-load-key"
-    base_url: https://gpt-load.spdt.work/proxy/gemini
+    api_key: ""
+    base_url: https://generativelanguage.googleapis.com
     max_output_tokens: 8000
     model: gemini-2.5-flash
     temperature: 1
