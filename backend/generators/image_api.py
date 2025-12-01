@@ -260,13 +260,14 @@ class ImageApiGenerator(ImageGeneratorBase):
             "model": model,
             "messages": [{"role": "user", "content": user_content}],
             "max_tokens": 4096,
-            "temperature": 1.0
+            "temperature": 1.0,
+            "stream": True  # 启用流式模式以支持flow2api等服务
         }
 
         api_url = f"{self.base_url}{self.endpoint_type}"
-        logger.info(f"Chat API 生成图片: {api_url}, model={model}")
+        logger.info(f"Chat API 生成图片: {api_url}, model={model}, stream=True")
 
-        response = requests.post(api_url, headers=headers, json=payload, timeout=300)
+        response = requests.post(api_url, headers=headers, json=payload, timeout=300, stream=True)
 
         if response.status_code != 200:
             error_detail = response.text[:500]
@@ -296,11 +297,79 @@ class ImageApiGenerator(ImageGeneratorBase):
                     f"【模型】{model}"
                 )
 
-        result = response.json()
-        logger.debug(f"Chat API 响应: {str(result)[:500]}")
+        # 处理流式响应(SSE格式)
+        try:
+            import json
+            accumulated_content = ""
+
+            for line in response.iter_lines():
+                if not line:
+                    continue
+
+                line_str = line.decode('utf-8')
+
+                # SSE格式: data: {...}
+                if line_str.startswith('data: '):
+                    data_str = line_str[6:]  # 移除 "data: " 前缀
+
+                    # 跳过 [DONE] 标记
+                    if data_str.strip() == '[DONE]':
+                        break
+
+                    try:
+                        chunk = json.loads(data_str)
+
+                        # 提取 delta content
+                        if "choices" in chunk and len(chunk["choices"]) > 0:
+                            delta = chunk["choices"][0].get("delta", {})
+                            if "content" in delta:
+                                accumulated_content += delta["content"]
+
+                    except json.JSONDecodeError:
+                        logger.debug(f"跳过无效JSON: {data_str[:100]}")
+                        continue
+
+            logger.debug(f"流式响应累积内容长度: {len(accumulated_content)} 字符")
+
+            if accumulated_content:
+                # 尝试从累积内容中提取图片
+                import re
+
+                # 1. 尝试解析 Markdown 图片链接: ![xxx](url)
+                pattern = r'!\[.*?\]\((https?://[^\s\)]+)\)'
+                urls = re.findall(pattern, accumulated_content)
+                if urls:
+                    logger.info(f"从流式响应中提取到 {len(urls)} 张图片，下载第一张...")
+                    return self._download_image(urls[0])
+
+                # 2. 尝试解析 Base64 data URL
+                if "data:image" in accumulated_content:
+                    logger.info("检测到 Base64 图片数据")
+                    data_url_match = re.search(r'data:image/[^;]+;base64,([A-Za-z0-9+/=]+)', accumulated_content)
+                    if data_url_match:
+                        base64_data = data_url_match.group(1)
+                        return base64.b64decode(base64_data)
+
+                # 3. 尝试提取纯 URL
+                url_match = re.search(r'https?://[^\s\)]+\.(png|jpg|jpeg|webp)', accumulated_content, re.IGNORECASE)
+                if url_match:
+                    url = url_match.group(0)
+                    logger.info(f"从流式响应中提取到图片 URL: {url[:100]}")
+                    return self._download_image(url)
+
+        except Exception as e:
+            logger.error(f"解析流式响应失败: {str(e)}")
+            # 继续尝试非流式解析
+
+        # 如果流式解析失败,尝试非流式解析(向后兼容)
+        try:
+            result = response.json()
+            logger.debug(f"Chat API 响应: {str(result)[:500]}")
+        except:
+            result = None
 
         # 解析响应
-        if "choices" in result and len(result["choices"]) > 0:
+        if result and "choices" in result and len(result["choices"]) > 0:
             choice = result["choices"][0]
             if "message" in choice and "content" in choice["message"]:
                 content = choice["message"]["content"]
@@ -326,14 +395,16 @@ class ImageApiGenerator(ImageGeneratorBase):
 
         raise Exception(
             "❌ 无法从 Chat API 响应中提取图片数据\n\n"
-            f"【响应内容】\n{str(result)[:500]}\n\n"
+            f"【累积内容】\n{accumulated_content[:300] if accumulated_content else '(空)'}\n"
+            f"【非流式响应】\n{str(result)[:300] if result else '(无)'}\n\n"
             "【可能原因】\n"
-            "1. 该模型不支持图片生成\n"
-            "2. 响应格式与预期不符\n"
+            "1. 流式响应格式不符合预期\n"
+            "2. 该模型不支持图片生成\n"
             "3. 提示词被安全过滤\n\n"
             "【解决方案】\n"
-            "1. 确认模型名称正确\n"
-            "2. 修改提示词后重试"
+            "1. 检查模型名称是否正确\n"
+            "2. 确认API服务支持流式图片生成\n"
+            "3. 修改提示词后重试"
         )
 
     def _download_image(self, url: str) -> bytes:
