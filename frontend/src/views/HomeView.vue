@@ -913,22 +913,288 @@ onUnmounted(() => {
   animation: slideUp 0.3s ease-out;
 }
 
-/* Responsive */
+/* Responsive - 移动端优化 */
 @media (max-width: 768px) {
+  .home-container {
+    padding-top: 8px !important;
+  }
+
+  /* 背景网格优化 */
   .showcase-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 12px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  /* Hero区域优化 */
+  .hero-section {
+    padding: 24px 16px !important;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+
+  .brand-pill {
+    font-size: 11px;
+    padding: 5px 12px;
+    margin-bottom: 12px;
+  }
+
+  .brand-pill svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px !important;
+  }
+
+  .platform-slogan {
+    font-size: 16px !important;
+    margin-bottom: 16px;
+  }
+
+  .page-title {
+    font-size: 24px !important;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 14px !important;
+  }
+
+  /* Composer容器优化 */
+  .composer-container {
+    padding: 16px !important;
+    max-width: 100%;
+    margin: 0 auto 24px;
+  }
+
+  .composer-textarea {
+    font-size: 15px !important;
+    min-height: 48px;
+  }
+
+  .composer-toolbar {
+    padding-top: 12px;
+  }
+
+  .tool-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .tool-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .generate-btn {
+    padding: 8px 24px !important;
+    height: 40px !important;
+    font-size: 14px !important;
+  }
+
+  /* 上传图片预览优化 */
+  .uploaded-images-preview {
+    padding: 10px;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .uploaded-image-item {
+    width: 50px;
+    height: 50px;
+  }
+
+  .upload-hint {
+    font-size: 11px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* 内容区域优化 */
+  .content-section {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  /* Dashboard网格 */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .feature-card {
+    min-height: 200px;
+    padding: 16px;
+  }
+
+  /* 卡片标题优化 */
+  .card-header {
+    margin-bottom: 12px;
+  }
+
+  .icon-box {
+    width: 32px;
+    height: 32px;
+  }
+
+  .icon-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .section-title-sm {
+    font-size: 15px !important;
+  }
+
+  .btn-text {
+    font-size: 12px !important;
+  }
+
+  /* 最近记录优化 */
+  .recent-item {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .recent-thumbnail {
+    width: 32px;
+    height: 42px;
+  }
+
+  .recent-title {
+    font-size: 13px;
+  }
+
+  .recent-date {
+    font-size: 11px;
+  }
+
+  .recent-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 热搜列表优化 */
+  .trend-item {
+    padding: 8px 8px;
+  }
+
+  .trend-rank {
+    width: 20px;
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  .trend-name {
+    font-size: 13px;
+  }
+
+  .trend-hot {
+    font-size: 11px;
+  }
+
+  .trend-hot svg {
+    width: 10px;
+    height: 10px;
+    margin-right: 2px !important;
+  }
+
+  .refresh-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 页脚优化 */
+  .home-footer {
+    margin-top: 24px;
+    padding: 20px 0 12px;
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .footer-license-info {
+    font-size: 11px;
+  }
+
+  /* Toast提示优化 */
+  .error-toast {
+    bottom: 20px;
+    left: 16px;
+    right: 16px;
+    transform: none;
+    max-width: calc(100% - 32px);
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .error-toast svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .hero-section {
+    padding: 20px 12px !important;
+  }
+
+  .platform-slogan {
+    font-size: 14px !important;
+  }
+
+  .page-title {
+    font-size: 20px !important;
+  }
+
+  .page-subtitle {
+    font-size: 13px !important;
+  }
+
+  .composer-container {
+    padding: 12px !important;
+  }
+
+  .content-section {
+    padding: 16px 12px;
+  }
+}
+
+/* 横屏优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    padding: 16px !important;
+    margin-bottom: 16px;
+  }
+
+  .hero-content {
+    margin-bottom: 20px;
+  }
+
+  .platform-slogan,
+  .page-subtitle {
+    display: none; /* 横屏时隐藏副标题节省空间 */
+  }
+
+  .content-section {
+    padding: 16px;
   }
 
   .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .scenarios-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
+
 
 /* 首页页脚样式 */
 .home-footer {

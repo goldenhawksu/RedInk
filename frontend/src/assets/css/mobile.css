@@ -1,0 +1,170 @@
+/**
+ * 移动端全局样式优化
+ * 适配小屏幕设备(手机、平板)
+ */
+
+/* 移动端触摸优化 */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* 容器padding优化 */
+  .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-top: 12px !important;
+  }
+
+  /* 卡片间距优化 */
+  .card {
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  /* 按钮触摸区域优化 */
+  button,
+  .btn {
+    min-height: 44px; /* iOS 推荐最小触摸区域 */
+    min-width: 44px;
+  }
+
+  /* 输入框优化 */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* 防止iOS自动缩放 */
+  }
+
+  /* 标题字号优化 */
+  .page-title {
+    font-size: 24px !important;
+  }
+
+  .section-title {
+    font-size: 18px !important;
+  }
+
+  /* 模态框全屏显示 */
+  .modal-overlay {
+    padding: 0 !important;
+  }
+
+  .modal-content {
+    max-width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 90vh;
+    margin-top: auto;
+  }
+
+  /* 图片网格优化 */
+  .image-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* 表单布局优化 */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  /* 导航栏优化 */
+  .navbar {
+    padding: 12px 16px !important;
+  }
+
+  .navbar-brand {
+    font-size: 18px !important;
+  }
+
+  .navbar-menu {
+    font-size: 14px !important;
+  }
+
+  /* Toast/错误提示优化 */
+  .error-toast,
+  .success-toast {
+    left: 16px !important;
+    right: 16px !important;
+    transform: none !important;
+    max-width: calc(100% - 32px);
+    font-size: 14px;
+  }
+
+  /* 页脚优化 */
+  footer {
+    font-size: 12px;
+    padding: 16px !important;
+  }
+}
+
+/* 超小屏幕(手机竖屏) */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .page-title {
+    font-size: 20px !important;
+  }
+
+  /* 按钮组堆叠 */
+  .btn-group {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .btn-group > * {
+    width: 100% !important;
+  }
+}
+
+/* 横屏优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+  }
+
+  .modal-content {
+    max-height: 80vh;
+  }
+}
+
+/* 平板竖屏 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 720px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* 确保安全区域 (iPhone X及以上) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .navbar {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+}
