@@ -45,7 +45,7 @@
           <!-- 文案编辑区 -->
           <div class="content-editor">
             <textarea
-              v-model="getPageContent(image.index)"
+              :value="getPageContent(image.index)"
               @input="updatePageContent(image.index, ($event.target as HTMLTextAreaElement).value)"
               class="content-textarea"
               placeholder="在此编辑文案..."
