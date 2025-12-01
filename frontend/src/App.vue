@@ -180,6 +180,7 @@ onMounted(() => {
   }
 
   .layout-sidebar {
+    width: 280px; /* 移动端固定宽度 */
     transform: translateX(-100%);
     box-shadow: none;
   }
@@ -189,32 +190,20 @@ onMounted(() => {
     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
   }
 
-  /* 移动端导航项只显示图标 */
-  .nav-text {
-    display: none;
-  }
-
+  /* 移动端保持显示导航文字 */
   .nav-item {
-    justify-content: center;
-    padding: 14px;
+    padding: 14px 18px;
+    justify-content: flex-start;
   }
 
-  /* 隐藏用户信息文字,只保留头像 */
-  .user-details {
-    display: none;
-  }
-
+  /* 移动端显示用户信息 */
   .user-info {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
-  /* Logo 文字隐藏 */
-  .logo-text {
-    display: none;
-  }
-
+  /* 移动端显示Logo文字 */
   .logo-area {
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
 </style>

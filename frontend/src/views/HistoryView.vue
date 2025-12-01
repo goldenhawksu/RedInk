@@ -683,6 +683,251 @@ onMounted(async () => {
   margin-bottom: 40px;
 }
 
+/* 移动端优化 */
+@media (max-width: 768px) {
+  /* 页头按钮组堆叠 */
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch !important;
+  }
+
+  .page-header > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .page-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 统计卡片堆叠 */
+  .stats-overview {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stat-box {
+    width: 100% !important;
+  }
+
+  /* 工具栏垂直布局 */
+  .toolbar-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .tabs-container {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    min-height: 44px; /* iOS推荐触摸区域 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-mini {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .search-mini input {
+    font-size: 16px !important; /* 防止iOS自动缩放 */
+  }
+
+  /* 图库网格双列布局 */
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .gallery-card {
+    border-radius: 8px;
+  }
+
+  .card-footer {
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-meta {
+    font-size: 11px;
+  }
+
+  /* 分页按钮优化 */
+  .pagination-wrapper {
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .page-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .page-indicator {
+    font-size: 14px;
+  }
+
+  /* 全屏模态框优化 */
+  .modal-fullscreen {
+    padding: 0;
+  }
+
+  .modal-body {
+    width: 100%;
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .modal-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .modal-header > div:first-child {
+    width: 100%;
+  }
+
+  .modal-header > div:last-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .modal-header button.btn {
+    flex: 1;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-title {
+    font-size: 16px;
+    padding-right: 40px; /* 为关闭按钮留空间 */
+  }
+
+  .title-expand-btn {
+    font-size: 12px;
+  }
+
+  .view-outline-btn {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  /* 图库网格在模态框中单列 */
+  .modal-gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .modal-img-item {
+    max-width: 100%;
+  }
+
+  /* 大纲模态框优化 */
+  .outline-modal-overlay {
+    padding: 0;
+  }
+
+  .outline-modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .outline-modal-header {
+    padding: 16px;
+  }
+
+  .outline-modal-header h3 {
+    font-size: 16px;
+  }
+
+  .outline-modal-body {
+    padding: 16px;
+  }
+
+  .outline-page-card {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .outline-page-card-content {
+    font-size: 13px;
+  }
+
+  /* 空状态优化 */
+  .empty-state-large {
+    padding: 60px 20px;
+  }
+
+  .empty-state-large h3 {
+    font-size: 16px;
+  }
+
+  .empty-state-large p {
+    font-size: 14px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .gallery-grid {
+    gap: 8px;
+  }
+
+  .stat-box {
+    padding: 12px;
+  }
+
+  .stat-icon-circle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat-content h4 {
+    font-size: 12px;
+  }
+
+  .stat-content .number {
+    font-size: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+}
+
 .gallery-card {
   background: white;
   border-radius: 12px;
