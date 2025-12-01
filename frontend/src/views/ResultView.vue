@@ -20,9 +20,9 @@
       <div class="grid-cols-4">
         <div v-for="image in store.images" :key="image.index" class="image-card group">
           <!-- Image Area -->
-          <div 
-            v-if="image.url" 
-            style="position: relative; aspect-ratio: 3/4; overflow: hidden; cursor: pointer;" 
+          <div
+            v-if="image.url"
+            style="position: relative; aspect-ratio: 3/4; overflow: hidden; cursor: pointer;"
             @click="viewImage(image.url)"
           >
             <img
@@ -35,18 +35,30 @@
                <div class="spinner" style="width: 24px; height: 24px; border-width: 2px; border-color: var(--primary); border-top-color: transparent;"></div>
                <span style="font-size: 12px; color: var(--primary); margin-top: 8px; font-weight: 600;">重绘中...</span>
             </div>
-            
+
             <!-- Hover Overlay -->
             <div v-else style="position: absolute; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;" class="hover-overlay">
               预览大图
             </div>
           </div>
-          
+
+          <!-- 文案编辑区 -->
+          <div class="content-editor">
+            <textarea
+              v-model="getPageContent(image.index)"
+              @input="updatePageContent(image.index, ($event.target as HTMLTextAreaElement).value)"
+              class="content-textarea"
+              placeholder="在此编辑文案..."
+              @click.stop
+            />
+            <div class="word-count">{{ getPageContent(image.index).length }} 字</div>
+          </div>
+
           <!-- Action Bar -->
           <div style="padding: 12px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 12px; color: var(--text-sub);">Page {{ image.index + 1 }}</span>
             <div style="display: flex; gap: 8px;">
-              <button 
+              <button
                 style="border: none; background: none; color: var(--text-sub); cursor: pointer; display: flex; align-items: center;"
                 title="重新生成此图"
                 @click="handleRegenerate(image)"
@@ -54,7 +66,7 @@
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
               </button>
-              <button 
+              <button
                 style="border: none; background: none; color: var(--primary); cursor: pointer; font-size: 12px;"
                 @click="downloadOne(image)"
               >
@@ -90,6 +102,51 @@
 .image-card:hover img {
   transform: scale(1.05);
 }
+
+/* 文案编辑区样式 */
+.content-editor {
+  position: relative;
+  padding: 12px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.content-textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 200px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: white;
+}
+
+.content-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 36, 66, 0.1);
+}
+
+.content-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.word-count {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-size: 11px;
+  color: var(--text-sub);
+  background: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
 </style>
 
 <script setup lang="ts">
@@ -106,6 +163,17 @@ const regeneratingIndex = ref<number | null>(null)
 // 图片查看器状态
 const showImageViewer = ref(false)
 const viewerImageIndex = ref(0)
+
+// 获取页面内容
+const getPageContent = (index: number): string => {
+  const page = store.outline.pages.find(p => p.index === index)
+  return page?.content || ''
+}
+
+// 更新页面内容
+const updatePageContent = (index: number, content: string) => {
+  store.updatePage(index, content)
+}
 
 // 获取所有图片URL
 const viewerImages = computed(() => {
