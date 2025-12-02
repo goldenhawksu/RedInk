@@ -19,8 +19,8 @@
     <!-- 侧边栏 Sidebar -->
     <aside class="layout-sidebar" :class="{ 'mobile-open': sidebarOpen }">
       <div class="logo-area">
-        <img src="/logo.png" alt="红墨" class="logo-icon" />
-        <span class="logo-text">红墨</span>
+        <img src="/logo.png" alt="CTS" class="logo-icon" />
+        <span class="logo-text">CTS</span>
       </div>
 
       <nav class="nav-menu">
@@ -40,10 +40,10 @@
 
       <div class="sidebar-footer">
         <div class="user-info">
-          <img src="/logo.png" alt="默子" class="user-avatar" />
+          <img src="/logo.png" alt="CTS" class="user-avatar" />
           <div class="user-details">
-            <div class="user-name">默子</div>
-            <div class="user-handle">mozi</div>
+            <div class="user-name"CTS</div>
+            <div class="user-handle">Su</div>
           </div>
         </div>
       </div>
