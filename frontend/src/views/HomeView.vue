@@ -150,6 +150,16 @@
                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
              </div>
              <h3 class="section-title-sm">全站热搜</h3>
+             <div class="quick-links">
+               <a href="https://glidea.github.io/banana-prompt-quicker" target="_blank" rel="noopener noreferrer" class="quick-link" title="Prompt 快捷查询">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                 Prompt
+               </a>
+               <a href="https://chatimg.ai/zh/gallery" target="_blank" rel="noopener noreferrer" class="quick-link" title="AI 图库">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                 图库
+               </a>
+             </div>
           </div>
           <span class="refresh-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -1237,5 +1247,80 @@ onUnmounted(() => {
 .footer-license-info a:hover {
   color: var(--primary);
   text-decoration: underline;
+}
+
+/* 快捷链接样式 */
+.quick-links {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+  align-items: center;
+}
+
+.quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #666;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-link:hover {
+  color: var(--primary);
+  background: #fff;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 36, 66, 0.15);
+}
+
+.quick-link svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.quick-link:hover svg {
+  transform: scale(1.1);
+}
+
+/* 移动端快捷链接优化 */
+@media (max-width: 768px) {
+  .quick-links {
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  .quick-link {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .quick-link svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* 超小屏幕隐藏文字,只显示图标 */
+@media (max-width: 480px) {
+  .quick-link {
+    padding: 6px;
+    min-width: 32px;
+    justify-content: center;
+  }
+
+  .quick-link svg {
+    margin: 0;
+  }
+
+  .quick-link svg + * {
+    display: none;
+  }
 }
 </style>
