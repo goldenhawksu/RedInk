@@ -911,47 +911,15 @@ async function handleFileImport(event: Event) {
       return
     }
 
-    // 保存导入的配置(包含完整API key)到临时变量
-    const importedTextProviders = importedConfig.text_generation.providers
-    const importedImageProviders = importedConfig.image_generation.providers
-
     // 更新本地配置
     textConfig.value = {
       active_provider: importedConfig.text_generation.active_provider || '',
-      providers: importedTextProviders
+      providers: importedConfig.text_generation.providers
     }
     imageConfig.value = importedConfig.image_generation
 
-    // 保存到服务器(不调用autoSaveConfig,避免重新加载导致API key被脱敏)
-    const config: Partial<Config> = {
-      text_generation: {
-        active_provider: textConfig.value.active_provider,
-        providers: textConfig.value.providers
-      },
-      image_generation: imageConfig.value
-    }
-
-    const result = await updateConfig(config)
-    if (!result.success) {
-      alert('❌ 保存失败：' + (result.error || '未知错误'))
-      return
-    }
-
-    // 成功保存后，标记所有provider已有API key
-    // 这样UI上会显示占位符而不是空白
-    Object.keys(importedTextProviders).forEach(key => {
-      if (importedTextProviders[key].api_key) {
-        textConfig.value.providers[key]._has_api_key = true
-        textConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedTextProviders[key].api_key)
-      }
-    })
-
-    Object.keys(importedImageProviders).forEach(key => {
-      if (importedImageProviders[key].api_key) {
-        imageConfig.value.providers[key]._has_api_key = true
-        imageConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedImageProviders[key].api_key)
-      }
-    })
+    // 保存到服务器
+    await autoSaveConfig()
 
     alert('✅ 配置已成功导入并保存')
   } catch (e: any) {
@@ -964,12 +932,6 @@ async function handleFileImport(event: Event) {
     // 清空 input，允许重复选择同一文件
     input.value = ''
   }
-}
-
-// 本地API key脱敏函数
-function _maskApiKeyLocally(key: string): string {
-  if (!key || key.length < 8) return '***'
-  return key.substring(0, 4) + '***' + key.substring(key.length - 4)
 }
 
 onMounted(() => {
