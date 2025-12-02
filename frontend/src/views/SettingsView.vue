@@ -805,7 +805,7 @@ async function testTextProviderInList(name: string, provider: any) {
     const result = await testConnection({
       type: provider.type,
       provider_name: name,
-      api_key: undefined,
+      api_key: provider.api_key || undefined, // 使用内存中的完整API key
       base_url: provider.base_url,
       model: provider.model
     })
@@ -823,7 +823,7 @@ async function testImageProviderInList(name: string, provider: any) {
     const result = await testConnection({
       type: provider.type,
       provider_name: name,
-      api_key: undefined,
+      api_key: provider.api_key || undefined, // 使用内存中的完整API key
       base_url: provider.base_url,
       model: provider.model
     })
@@ -937,10 +937,13 @@ async function handleFileImport(event: Event) {
       return
     }
 
-    // 成功保存后，标记所有provider已有API key
-    // 这样UI上会显示占位符而不是空白
+    // 成功保存后,标记所有provider已有API key
+    // 保留完整的api_key字段在内存中,同时添加脱敏显示用的api_key_masked
     Object.keys(importedTextProviders).forEach(key => {
       if (importedTextProviders[key].api_key) {
+        // 保留完整的api_key(用于测试连接和后续保存)
+        textConfig.value.providers[key].api_key = importedTextProviders[key].api_key
+        // 添加标志和脱敏显示
         textConfig.value.providers[key]._has_api_key = true
         textConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedTextProviders[key].api_key)
       }
@@ -948,6 +951,9 @@ async function handleFileImport(event: Event) {
 
     Object.keys(importedImageProviders).forEach(key => {
       if (importedImageProviders[key].api_key) {
+        // 保留完整的api_key(用于测试连接和后续保存)
+        imageConfig.value.providers[key].api_key = importedImageProviders[key].api_key
+        // 添加标志和脱敏显示
         imageConfig.value.providers[key]._has_api_key = true
         imageConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedImageProviders[key].api_key)
       }
