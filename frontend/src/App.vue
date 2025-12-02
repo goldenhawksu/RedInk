@@ -42,7 +42,7 @@
         <div class="user-info">
           <img src="/logo.png" alt="CTS" class="user-avatar" />
           <div class="user-details">
-            <div class="user-name"CTS</div>
+            <div class="user-name">CTS</div>
             <div class="user-handle">Su</div>
           </div>
         </div>
