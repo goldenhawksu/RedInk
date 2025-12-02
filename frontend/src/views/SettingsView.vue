@@ -801,6 +801,19 @@ async function testImageConnection() {
 
 // 测试列表中的文本服务商
 async function testTextProviderInList(name: string, provider: any) {
+  // 调试日志:验证测试连接时provider对象的内容
+  console.log(`[测试] 文本生成服务商 ${name}:`, {
+    hasApiKey: !!provider.api_key,
+    apiKeyLength: provider.api_key?.length,
+    apiKeyPreview: provider.api_key?.substring(0, 10) + '...',
+    willSendApiKey: provider.api_key || undefined,
+    providerData: {
+      type: provider.type,
+      base_url: provider.base_url,
+      model: provider.model
+    }
+  })
+
   try {
     const result = await testConnection({
       type: provider.type,
@@ -813,12 +826,26 @@ async function testTextProviderInList(name: string, provider: any) {
       alert('✅ ' + result.message)
     }
   } catch (e: any) {
+    console.error(`[测试失败] 文本生成服务商 ${name}:`, e)
     alert('❌ 连接失败：' + (e.response?.data?.error || e.message))
   }
 }
 
 // 测试列表中的图片服务商
 async function testImageProviderInList(name: string, provider: any) {
+  // 调试日志:验证测试连接时provider对象的内容
+  console.log(`[测试] 图片生成服务商 ${name}:`, {
+    hasApiKey: !!provider.api_key,
+    apiKeyLength: provider.api_key?.length,
+    apiKeyPreview: provider.api_key?.substring(0, 10) + '...',
+    willSendApiKey: provider.api_key || undefined,
+    providerData: {
+      type: provider.type,
+      base_url: provider.base_url,
+      model: provider.model
+    }
+  })
+
   try {
     const result = await testConnection({
       type: provider.type,
@@ -831,6 +858,7 @@ async function testImageProviderInList(name: string, provider: any) {
       alert('✅ ' + result.message)
     }
   } catch (e: any) {
+    console.error(`[测试失败] 图片生成服务商 ${name}:`, e)
     alert('❌ 连接失败：' + (e.response?.data?.error || e.message))
   }
 }
@@ -915,20 +943,13 @@ async function handleFileImport(event: Event) {
     const importedTextProviders = importedConfig.text_generation.providers
     const importedImageProviders = importedConfig.image_generation.providers
 
-    // 更新本地配置
-    textConfig.value = {
-      active_provider: importedConfig.text_generation.active_provider || '',
-      providers: importedTextProviders
-    }
-    imageConfig.value = importedConfig.image_generation
-
-    // 保存到服务器(不调用autoSaveConfig,避免重新加载导致API key被脱敏)
+    // 先保存到服务器(发送完整的API key)
     const config: Partial<Config> = {
       text_generation: {
-        active_provider: textConfig.value.active_provider,
-        providers: textConfig.value.providers
+        active_provider: importedConfig.text_generation.active_provider || '',
+        providers: importedTextProviders
       },
-      image_generation: imageConfig.value
+      image_generation: importedConfig.image_generation
     }
 
     const result = await updateConfig(config)
@@ -937,27 +958,59 @@ async function handleFileImport(event: Event) {
       return
     }
 
-    // 成功保存后,标记所有provider已有API key
-    // 保留完整的api_key字段在内存中,同时添加脱敏显示用的api_key_masked
-    Object.keys(importedTextProviders).forEach(key => {
-      if (importedTextProviders[key].api_key) {
-        // 保留完整的api_key(用于测试连接和后续保存)
-        textConfig.value.providers[key].api_key = importedTextProviders[key].api_key
-        // 添加标志和脱敏显示
-        textConfig.value.providers[key]._has_api_key = true
-        textConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedTextProviders[key].api_key)
-      }
-    })
+    // 保存成功后,更新本地配置并保留完整的API key在内存中
+    // 注意:这里必须在保存成功后再更新,确保完整的API key被发送到服务器
+    textConfig.value.active_provider = importedConfig.text_generation.active_provider || ''
 
-    Object.keys(importedImageProviders).forEach(key => {
-      if (importedImageProviders[key].api_key) {
-        // 保留完整的api_key(用于测试连接和后续保存)
-        imageConfig.value.providers[key].api_key = importedImageProviders[key].api_key
-        // 添加标志和脱敏显示
-        imageConfig.value.providers[key]._has_api_key = true
-        imageConfig.value.providers[key].api_key_masked = _maskApiKeyLocally(importedImageProviders[key].api_key)
+    // 深拷贝providers对象,并为每个provider添加完整的api_key和脱敏显示
+    const newTextProviders: Record<string, any> = {}
+    Object.keys(importedTextProviders).forEach(key => {
+      newTextProviders[key] = {
+        ...importedTextProviders[key],
+        // 保留完整的api_key(用于测试连接)
+        api_key: importedTextProviders[key].api_key,
+        // 添加脱敏显示
+        api_key_masked: importedTextProviders[key].api_key
+          ? _maskApiKeyLocally(importedTextProviders[key].api_key)
+          : '',
+        // 添加标志
+        _has_api_key: !!importedTextProviders[key].api_key
       }
+      // 调试日志:验证API key是否正确保存
+      console.log(`[导入] 文本生成服务商 ${key}:`, {
+        hasApiKey: !!newTextProviders[key].api_key,
+        apiKeyLength: newTextProviders[key].api_key?.length,
+        apiKeyPreview: newTextProviders[key].api_key?.substring(0, 10) + '...',
+        masked: newTextProviders[key].api_key_masked
+      })
     })
+    textConfig.value.providers = newTextProviders
+
+    // 同样处理图片生成配置
+    imageConfig.value.active_provider = importedConfig.image_generation.active_provider || ''
+
+    const newImageProviders: Record<string, any> = {}
+    Object.keys(importedImageProviders).forEach(key => {
+      newImageProviders[key] = {
+        ...importedImageProviders[key],
+        // 保留完整的api_key(用于测试连接)
+        api_key: importedImageProviders[key].api_key,
+        // 添加脱敏显示
+        api_key_masked: importedImageProviders[key].api_key
+          ? _maskApiKeyLocally(importedImageProviders[key].api_key)
+          : '',
+        // 添加标志
+        _has_api_key: !!importedImageProviders[key].api_key
+      }
+      // 调试日志:验证API key是否正确保存
+      console.log(`[导入] 图片生成服务商 ${key}:`, {
+        hasApiKey: !!newImageProviders[key].api_key,
+        apiKeyLength: newImageProviders[key].api_key?.length,
+        apiKeyPreview: newImageProviders[key].api_key?.substring(0, 10) + '...',
+        masked: newImageProviders[key].api_key_masked
+      })
+    })
+    imageConfig.value.providers = newImageProviders
 
     alert('✅ 配置已成功导入并保存')
   } catch (e: any) {
