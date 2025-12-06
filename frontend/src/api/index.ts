@@ -552,6 +552,8 @@ export async function getConfig(): Promise<{
   success: boolean
   config?: Config
   error?: string
+  binding_expired?: boolean
+  message?: string
 }> {
   const response = await axiosInstance.get(`${API_BASE_URL}/config`)
   return response.data

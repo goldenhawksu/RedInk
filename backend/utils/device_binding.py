@@ -175,6 +175,53 @@ class DeviceBinding:
             logger.error(f"❌ 验证设备失败: {e}")
             return False, f"验证失败: {str(e)}"
 
+    def is_device_binding_valid(self, provider_name: str, device_id: str) -> bool:
+        """
+        检查设备绑定是否有效(不更新last_used时间,仅用于状态查询)
+
+        Args:
+            provider_name: 服务商名称
+            device_id: 设备指纹
+
+        Returns:
+            绑定是否有效
+        """
+        try:
+            providers = self.config.get('providers', {})
+            if provider_name not in providers:
+                return False
+
+            provider = providers[provider_name]
+
+            # 如果没有配置设备绑定,认为有效(向后兼容)
+            if 'authorized_devices' not in provider or not provider['authorized_devices']:
+                return True
+
+            devices = provider['authorized_devices']
+
+            # 查找设备
+            for device in devices:
+                if device.get('device_id') == device_id:
+                    # 检查是否过期
+                    bound_at_str = device.get('bound_at')
+                    if not bound_at_str:
+                        continue
+
+                    bound_at = datetime.fromisoformat(bound_at_str)
+                    expiry_time = bound_at + timedelta(hours=self.BINDING_DURATION_HOURS)
+
+                    if datetime.now() > expiry_time:
+                        return False
+
+                    return True
+
+            # 设备未绑定
+            return False
+
+        except Exception as e:
+            logger.error(f"❌ 检查设备绑定有效性失败: {e}")
+            return False
+
     def _cleanup_expired_devices(self, provider_name: str):
         """清理过期设备"""
         try:

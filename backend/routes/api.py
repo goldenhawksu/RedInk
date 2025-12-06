@@ -783,6 +783,52 @@ def get_config():
                 'providers': {}
             }
 
+        # 检查设备绑定状态
+        device_id = request.headers.get('X-Device-ID')
+        binding_expired = False
+
+        if device_id:
+            # 重新加载配置以获取最新绑定信息
+            text_binding_manager = get_text_binding_manager()
+            image_binding_manager = get_image_binding_manager()
+
+            text_binding_manager.config = text_binding_manager._load_config()
+            image_binding_manager.config = image_binding_manager._load_config()
+
+            # 检查文本服务绑定
+            text_active = text_config.get('active_provider', '')
+            if text_active and text_active != 'default':
+                if not text_binding_manager.is_device_binding_valid(text_active, device_id):
+                    binding_expired = True
+                    logger.warning(f"⏰ 文本服务设备绑定已过期: {device_id[:8]}...")
+
+            # 检查图片服务绑定
+            image_active = image_config.get('active_provider', '')
+            if image_active and image_active != 'default':
+                if not image_binding_manager.is_device_binding_valid(image_active, device_id):
+                    binding_expired = True
+                    logger.warning(f"⏰ 图片服务设备绑定已过期: {device_id[:8]}...")
+
+        # 如果设备绑定过期,返回空配置
+        if binding_expired:
+            logger.info(f"🔒 设备绑定已过期,返回空配置")
+            return jsonify({
+                "success": True,
+                "config": {
+                    "text_generation": {
+                        "active_provider": "",
+                        "providers": {}
+                    },
+                    "image_generation": {
+                        "active_provider": "",
+                        "providers": {}
+                    }
+                },
+                "binding_expired": True,
+                "message": "设备绑定已过期,请重新配置API Key以绑定当前设备"
+            })
+
+        # 返回正常配置
         return jsonify({
             "success": True,
             "config": {

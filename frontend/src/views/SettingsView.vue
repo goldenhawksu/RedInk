@@ -482,11 +482,27 @@ async function loadConfig() {
   try {
     const result = await getConfig()
     if (result.success && result.config) {
-      textConfig.value = {
-        active_provider: result.config.text_generation.active_provider,
-        providers: result.config.text_generation.providers
+      // 检查设备绑定是否过期
+      if (result.binding_expired) {
+        // 显示过期提示
+        alert('⚠️ ' + (result.message || '设备绑定已过期,请重新配置API Key'))
+        // 清空本地配置显示
+        textConfig.value = {
+          active_provider: '',
+          providers: {}
+        }
+        imageConfig.value = {
+          active_provider: '',
+          providers: {}
+        }
+      } else {
+        // 正常加载配置
+        textConfig.value = {
+          active_provider: result.config.text_generation.active_provider,
+          providers: result.config.text_generation.providers
+        }
+        imageConfig.value = result.config.image_generation
       }
-      imageConfig.value = result.config.image_generation
     } else {
       alert('加载配置失败: ' + (result.error || '未知错误'))
     }
