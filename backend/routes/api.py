@@ -809,20 +809,32 @@ def get_config():
                     binding_expired = True
                     logger.warning(f"⏰ 图片服务设备绑定已过期: {device_id[:8]}...")
 
-        # 如果设备绑定过期,返回空配置
+        # 如果设备绑定过期,返回脱敏但保留结构的配置
         if binding_expired:
-            logger.info(f"🔒 设备绑定已过期,返回空配置")
+            logger.info(f"🔒 设备绑定已过期,返回脱敏配置(保留服务商信息但隐藏敏感数据)")
+
+            # 返回脱敏的配置,保留服务商列表但清空API Key
+            def mask_config_for_expired(config):
+                """对过期配置进行脱敏处理"""
+                masked_providers = {}
+                for name, provider in config.get('providers', {}).items():
+                    masked_provider = provider.copy()
+                    # 清空API Key但保留其他配置信息
+                    if 'api_key' in masked_provider:
+                        masked_provider['api_key'] = ''
+                        masked_provider['api_key_masked'] = _mask_api_key(provider.get('api_key', ''))
+                    masked_providers[name] = masked_provider
+
+                return {
+                    'active_provider': config.get('active_provider', ''),  # 保留激活的服务商名称
+                    'providers': masked_providers
+                }
+
             return jsonify({
                 "success": True,
                 "config": {
-                    "text_generation": {
-                        "active_provider": "",
-                        "providers": {}
-                    },
-                    "image_generation": {
-                        "active_provider": "",
-                        "providers": {}
-                    }
+                    "text_generation": mask_config_for_expired(text_config),
+                    "image_generation": mask_config_for_expired(image_config)
                 },
                 "binding_expired": True,
                 "message": "设备绑定已过期,请重新配置API Key以绑定当前设备"
@@ -872,7 +884,12 @@ def update_config():
 
             image_gen_data = data['image_generation']
             if 'active_provider' in image_gen_data:
-                image_config['active_provider'] = image_gen_data['active_provider']
+                # 验证 active_provider 不能为空字符串
+                new_active = image_gen_data['active_provider']
+                if new_active and new_active.strip():  # 只有非空才更新
+                    image_config['active_provider'] = new_active
+                elif not new_active:  # 如果传入空值,保持原有配置或使用default
+                    image_config['active_provider'] = image_config.get('active_provider', 'default')
 
             if 'providers' in image_gen_data:
                 # 合并 providers，保留未更新的 api_key
@@ -904,7 +921,12 @@ def update_config():
 
             text_gen_data = data['text_generation']
             if 'active_provider' in text_gen_data:
-                text_config['active_provider'] = text_gen_data['active_provider']
+                # 验证 active_provider 不能为空字符串
+                new_active = text_gen_data['active_provider']
+                if new_active and new_active.strip():  # 只有非空才更新
+                    text_config['active_provider'] = new_active
+                elif not new_active:  # 如果传入空值,保持原有配置或使用default
+                    text_config['active_provider'] = text_config.get('active_provider', 'default')
 
             if 'providers' in text_gen_data:
                 # 合并 providers，保留未更新的 api_key

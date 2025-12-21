@@ -58,6 +58,15 @@ def require_device_binding(validate_text=True, validate_image=False):
             # 3. 验证文本服务
             if validate_text:
                 active_provider = TEXT_BINDING_MANAGER.config.get('active_provider', 'default')
+
+                # 检查 active_provider 是否为空字符串
+                if not active_provider or active_provider.strip() == '':
+                    logger.error("❌ 文本服务未配置激活的服务商")
+                    return jsonify({
+                        "success": False,
+                        "error": "设备验证失败: 未配置激活的文本服务商\n\n💡 解决方法:\n1. 在'设置'页面添加并激活一个文本服务商\n2. 确保服务商配置完整并测试成功"
+                    }), 403
+
                 valid, message = TEXT_BINDING_MANAGER.validate_device(active_provider, device_id)
 
                 if not valid:
@@ -72,6 +81,15 @@ def require_device_binding(validate_text=True, validate_image=False):
             # 4. 验证图片服务
             if validate_image:
                 active_provider = IMAGE_BINDING_MANAGER.config.get('active_provider', 'default')
+
+                # 检查 active_provider 是否为空字符串
+                if not active_provider or active_provider.strip() == '':
+                    logger.error("❌ 图片服务未配置激活的服务商")
+                    return jsonify({
+                        "success": False,
+                        "error": "设备验证失败: 未配置激活的图片服务商\n\n💡 解决方法:\n1. 在'设置'页面添加并激活一个图片服务商\n2. 确保服务商配置完整并测试成功"
+                    }), 403
+
                 valid, message = IMAGE_BINDING_MANAGER.validate_device(active_provider, device_id)
 
                 if not valid:
