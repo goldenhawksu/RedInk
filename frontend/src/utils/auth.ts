@@ -1,4 +1,4 @@
-// 简单的 Basic Auth 拦截器
+// 简单的密码认证拦截器
 export function checkBasicAuth(): boolean {
   // 检查是否在生产环境
   if (import.meta.env.MODE !== 'production') {
@@ -11,22 +11,20 @@ export function checkBasicAuth(): boolean {
     return true;
   }
 
-  // 弹出认证对话框
-  const credentials = prompt('请输入访问凭证 (格式: CTS:xxx)');
+  // 弹出密码输入对话框
+  const password = prompt('请输入访问密码:');
 
-  if (!credentials) {
-    alert('需要认证才能访问');
+  if (!password) {
+    alert('需要密码才能访问');
     return false;
   }
 
-  const [username, password] = credentials.split(':');
-
-  // 验证凭证
-  if (username === 'CTS' && password === 'IcanWewill') {
+  // 验证密码
+  if (password === 'IcanWewill') {
     sessionStorage.setItem('authenticated', 'true');
     return true;
   }
 
-  alert('认证失败,凭证错误');
+  alert('密码错误,请重试');
   return false;
 }
