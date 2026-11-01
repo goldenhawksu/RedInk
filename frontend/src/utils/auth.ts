@@ -20,7 +20,7 @@ export function checkBasicAuth(): boolean {
   }
 
   // 验证密码
-  if (password === 'IcanWewill') {
+  if (password === 'Ican,Wewill') {
     sessionStorage.setItem('authenticated', 'true');
     return true;
   }
