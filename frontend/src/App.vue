@@ -19,7 +19,7 @@
     <!-- 侧边栏 Sidebar -->
     <aside class="layout-sidebar" :class="{ 'mobile-open': sidebarOpen }">
       <div class="logo-area">
-        <img src="/logo.png" alt="CTS" class="logo-icon" />
+        <img src="/logo-optimized-v1.webp" alt="CTS" class="logo-icon" />
         <span class="logo-text">CTS</span>
       </div>
 
@@ -40,7 +40,7 @@
 
       <div class="sidebar-footer">
         <div class="user-info">
-          <img src="/logo.png" alt="CTS" class="user-avatar" />
+          <img src="/logo-optimized-v1.webp" alt="CTS" class="user-avatar" />
           <div class="user-details">
             <div class="user-name">CTS</div>
             <div class="user-handle">Su</div>
